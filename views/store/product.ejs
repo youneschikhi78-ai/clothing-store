@@ -1,0 +1,59 @@
+<%- include('../partials/header', { currentPage: 'products' }) %>
+
+<div class="container product-detail">
+  <div class="product-gallery">
+    <div class="product-image large <%= product.image ? '' : 'placeholder' %>">
+      <% if (product.image) { %>
+        <img src="<%= product.image %>" alt="<%= product.name %>">
+      <% } else { %>
+        <span><%= product.name.charAt(0) %></span>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="product-info">
+    <p class="product-category">
+      <% if (product.category_name) { %><a href="/products?cat=<%= product.category_id %>"><%= product.category_name %></a><% } %>
+    </p>
+    <h1><%= product.name %></h1>
+    <div class="product-price">
+      <span class="price-current"><%= product.price.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+      <% if (product.old_price && product.old_price > product.price) { %>
+        <span class="price-old"><%= product.old_price.toLocaleString('ar-EG') %></span>
+        <span class="badge badge-sale">خصم <%= Math.round((1 - product.price / product.old_price) * 100) %>%</span>
+      <% } %>
+    </div>
+    <p class="stock-status <%= product.stock > 0 ? 'in' : 'out' %>">
+      <%= product.stock > 0 ? 'متوفر: ' + product.stock + ' قطعة' : 'نفدت الكمية' %>
+    </p>
+    <div class="product-description">
+      <p><%= product.description || 'لا يوجد وصف لهذا المنتج.' %></p>
+    </div>
+    <form action="/cart/add" method="POST" class="add-to-cart-form">
+      <input type="hidden" name="id" value="<%= product.id %>">
+      <div class="qty-control">
+        <button type="button" onclick="changeQty(-1)">-</button>
+        <input type="number" name="qty" id="qty" value="1" min="1" max="<%= Math.max(product.stock, 1) %>">
+        <button type="button" onclick="changeQty(1)">+</button>
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg" <%= product.stock === 0 ? 'disabled' : '' %>>
+        🛒 أضف إلى السلة
+      </button>
+    </form>
+  </div>
+</div>
+
+<% if (related.length) { %>
+<section class="products-section">
+  <div class="container">
+    <h2 class="section-title">منتجات مشابهة</h2>
+    <div class="products-grid">
+      <% related.forEach(p => { %>
+        <%- include('../partials/product-card', { product: p }) %>
+      <% }) %>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<%- include('../partials/footer') %>

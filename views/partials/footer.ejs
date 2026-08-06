@@ -1,0 +1,39 @@
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <h3><%= site.site_name || 'المتجر' %></h3>
+        <p><%= site.site_tagline || '' %></p>
+        <% if (site.fb_url && site.fb_url !== '#') { %><a href="<%= site.fb_url %>" class="social-link">فيسبوك</a><% } %>
+        <% if (site.insta_url && site.insta_url !== '#') { %><a href="<%= site.insta_url %>" class="social-link">انستغرام</a><% } %>
+        <% if (site.tw_url && site.tw_url !== '#') { %><a href="<%= site.tw_url %>" class="social-link">تويتر</a><% } %>
+      </div>
+      <div>
+        <h3>روابط سريعة</h3>
+        <a href="/products">المنتجات</a>
+        <a href="/page/about">من نحن</a>
+        <a href="/page/shipping">الشحن والتوصيل</a>
+        <a href="/page/returns">سياسة الإرجاع</a>
+      </div>
+      <div>
+        <h3>الفئات</h3>
+        <% cats.forEach(c => { %>
+          <a href="/products?cat=<%= c.slug %>"><%= c.name %></a>
+        <% }) %>
+      </div>
+      <div>
+        <h3>تواصل معنا</h3>
+        <p>📞 <%= site.site_phone || '' %></p>
+        <p>✉️ <%= site.site_email || '' %></p>
+        <p>📍 <%= site.site_address || '' %></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        © <%= new Date().getFullYear() %> <%= site.site_name || 'المتجر' %> — جميع الحقوق محفوظة
+      </div>
+    </div>
+  </footer>
+  <script src="/js/main.js"></script>
+</body>
+</html>

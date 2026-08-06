@@ -1,0 +1,39 @@
+<%- include('../partials/header') %>
+
+<div class="container page-head">
+  <h1>تفاصيل الطلب #<%= order.id %></h1>
+</div>
+
+<div class="container">
+  <div class="card">
+    <div class="order-meta">
+      <div><span>التاريخ:</span> <%= new Date(order.created_at).toLocaleString('ar-EG') %></div>
+      <div><span>الحالة:</span> <span class="status status-<%= order.status %>"><%= order.status %></span></div>
+      <div><span>الاسم:</span> <%= order.name %></div>
+      <div><span>الهاتف:</span> <%= order.phone %></div>
+      <div><span>العنوان:</span> <%= order.city %> — <%= order.address %></div>
+      <% if (order.notes) { %><div><span>ملاحظات:</span> <%= order.notes %></div><% } %>
+    </div>
+    <table class="table">
+      <thead>
+        <tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr>
+      </thead>
+      <tbody>
+        <% items.forEach(it => { %>
+          <tr>
+            <td><%= it.product_name %></td>
+            <td><%= it.qty %></td>
+            <td><%= it.price.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></td>
+            <td><%= (it.price * it.qty).toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <div class="summary-row total">
+      <span>الإجمالي</span>
+      <span><%= order.total.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

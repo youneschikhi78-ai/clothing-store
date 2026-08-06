@@ -1,0 +1,36 @@
+<%- include('../partials/header', { currentPage: 'products' }) %>
+
+<div class="container page-head">
+  <h1><%= currentCat ? 'الفئة: ' + currentCat.name : (q ? 'نتائج البحث عن "' + q + '"' : 'جميع المنتجات') %></h1>
+  <form class="search-form" action="/products" method="GET">
+    <input type="text" name="q" value="<%= q || '' %>" placeholder="ابحث عن منتج...">
+    <button type="submit" class="btn btn-primary">بحث</button>
+  </form>
+</div>
+
+<div class="container products-layout">
+  <aside class="filters">
+    <h3>الفئات</h3>
+    <a href="/products" class="<%= !currentCat ? 'active' : '' %>">جميع المنتجات</a>
+    <% cats.forEach(c => { %>
+      <a href="/products?cat=<%= c.slug %>" class="<%= currentCat && currentCat.id === c.id ? 'active' : '' %>"><%= c.name %></a>
+    <% }) %>
+  </aside>
+
+  <div class="products-main">
+    <% if (products.length === 0) { %>
+      <div class="empty-state">
+        <p>لا توجد منتجات مطابقة</p>
+      </div>
+    <% } else { %>
+      <p class="result-count"><%= products.length %> منتج</p>
+      <div class="products-grid">
+        <% products.forEach(p => { %>
+          <%- include('../partials/product-card', { product: p }) %>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

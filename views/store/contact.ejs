@@ -1,0 +1,41 @@
+<%- include('../partials/header') %>
+
+<div class="container page-head">
+  <h1>اتصل بنا</h1>
+</div>
+
+<div class="container contact-layout">
+  <div class="card">
+    <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+    <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+    <form action="/contact" method="POST">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>الاسم *</label>
+          <input type="text" name="name" required>
+        </div>
+        <div class="form-group">
+          <label>البريد الإلكتروني *</label>
+          <input type="email" name="email" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>الموضوع</label>
+        <input type="text" name="subject">
+      </div>
+      <div class="form-group">
+        <label>الرسالة *</label>
+        <textarea name="message" rows="5" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">إرسال</button>
+    </form>
+  </div>
+  <div class="contact-info card">
+    <h3>معلومات التواصل</h3>
+    <p>📞 <%= site.site_phone || '' %></p>
+    <p>✉️ <%= site.site_email || '' %></p>
+    <p>📍 <%= site.site_address || '' %></p>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

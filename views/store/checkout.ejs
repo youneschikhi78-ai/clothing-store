@@ -1,0 +1,57 @@
+<%- include('../partials/header') %>
+
+<div class="container page-head">
+  <h1>إتمام الطلب</h1>
+</div>
+
+<div class="container checkout-layout">
+  <form action="/checkout" method="POST" class="checkout-form card">
+    <h3>بيانات الشحن</h3>
+    <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>الاسم الكامل *</label>
+        <input type="text" name="name" value="<%= user ? user.name : '' %>" required>
+      </div>
+      <div class="form-group">
+        <label>رقم الهاتف *</label>
+        <input type="tel" name="phone" placeholder="01xxxxxxxxx" required>
+      </div>
+      <div class="form-group">
+        <label>المدينة *</label>
+        <input type="text" name="city" required>
+      </div>
+      <div class="form-group">
+        <label>العنوان بالتفصيل *</label>
+        <input type="text" name="address" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>ملاحظات (اختياري)</label>
+      <textarea name="notes" rows="3"></textarea>
+    </div>
+
+    <div class="checkout-summary">
+      <h3>ملخص الطلب</h3>
+      <% cart.items.forEach(it => { %>
+        <div class="summary-row">
+          <span><%= it.name %> × <%= it.qty %></span>
+          <span><%= (it.price * it.qty).toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+        </div>
+      <% }) %>
+      <div class="summary-row">
+        <span>الشحن</span>
+        <span><%= shippingCost === 0 ? 'مجاني' : shippingCost.toLocaleString('ar-EG') + ' ' + (site.currency || 'ج.م') %></span>
+      </div>
+      <hr>
+      <div class="summary-row total">
+        <span>الإجمالي</span>
+        <span><%= (cart.total + shippingCost).toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg btn-block">الدفع عند الاستلام</button>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title ? title + ' | ' : '' %>لوحة التحكم</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+</head>
+<body class="admin-body">
+  <aside class="admin-sidebar">
+    <a href="/" class="admin-logo">👕 <%= site.site_name || 'المتجر' %></a>
+    <nav class="admin-nav">
+      <a href="/admin" class="<%= adminPath === '/' ? 'active' : '' %>">📊 نظرة عامة</a>
+      <a href="/admin/products" class="<%= adminPath.startsWith('/products') ? 'active' : '' %>">👕 المنتجات</a>
+      <a href="/admin/categories" class="<%= adminPath.startsWith('/categories') ? 'active' : '' %>">🗂️ الفئات</a>
+      <a href="/admin/orders" class="<%= adminPath.startsWith('/orders') ? 'active' : '' %>">📦 الطلبات</a>
+      <a href="/admin/customers" class="<%= adminPath.startsWith('/customers') ? 'active' : '' %>">👥 العملاء</a>
+      <a href="/admin/messages" class="<%= adminPath.startsWith('/messages') ? 'active' : '' %>">✉️ الرسائل</a>
+      <a href="/admin/banners" class="<%= adminPath.startsWith('/banners') ? 'active' : '' %>">🖼️ البانرات</a>
+      <a href="/admin/pages" class="<%= adminPath.startsWith('/pages') ? 'active' : '' %>">📄 الصفحات</a>
+      <a href="/admin/settings" class="<%= adminPath.startsWith('/settings') ? 'active' : '' %>">⚙️ الإعدادات</a>
+      <a href="/admin/profile" class="<%= adminPath.startsWith('/profile') ? 'active' : '' %>">🔑 الملف الشخصي</a>
+    </nav>
+    <div class="admin-sidebar-footer">
+      <a href="/" target="_blank">🌐 عرض المتجر</a>
+      <a href="/logout">🚪 تسجيل الخروج</a>
+    </div>
+  </aside>
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <h1><%= title %></h1>
+      <span class="admin-user">مرحباً، <%= adminUser.name %></span>
+    </header>
+    <div class="admin-content">

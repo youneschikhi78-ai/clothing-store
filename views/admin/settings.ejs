@@ -1,0 +1,77 @@
+<%- include('../partials/admin-header') %>
+
+<% if (saved) { %><div class="alert alert-success">تم حفظ الإعدادات بنجاح</div><% } %>
+
+<form action="/admin/settings" method="POST" class="card">
+  <h3>معلومات المتجر</h3>
+  <div class="form-grid">
+    <div class="form-group">
+      <label>اسم المتجر</label>
+      <input type="text" name="site_name" value="<%= s.site_name || '' %>">
+    </div>
+    <div class="form-group">
+      <label>الشعار/الوصف القصير</label>
+      <input type="text" name="site_tagline" value="<%= s.site_tagline || '' %>">
+    </div>
+    <div class="form-group">
+      <label>رقم الهاتف</label>
+      <input type="text" name="site_phone" value="<%= s.site_phone || '' %>">
+    </div>
+    <div class="form-group">
+      <label>البريد الإلكتروني</label>
+      <input type="text" name="site_email" value="<%= s.site_email || '' %>">
+    </div>
+    <div class="form-group">
+      <label>العنوان</label>
+      <input type="text" name="site_address" value="<%= s.site_address || '' %>">
+    </div>
+    <div class="form-group">
+      <label>العملة</label>
+      <input type="text" name="currency" value="<%= s.currency || '' %>">
+    </div>
+    <div class="form-group">
+      <label>رسوم الشحن</label>
+      <input type="number" step="0.01" min="0" name="shipping_fee" value="<%= s.shipping_fee || '' %>">
+    </div>
+    <div class="form-group">
+      <label>شحن مجاني للطلبات فوق</label>
+      <input type="number" step="0.01" min="0" name="free_shipping_over" value="<%= s.free_shipping_over || '' %>">
+    </div>
+  </div>
+
+  <h3>الصفحة الرئيسية</h3>
+  <div class="form-grid">
+    <div class="form-group">
+      <label>عنوان الواجهة (Hero)</label>
+      <input type="text" name="hero_title" value="<%= s.hero_title || '' %>">
+    </div>
+    <div class="form-group">
+      <label>النص الفرعي للواجهة</label>
+      <input type="text" name="hero_subtitle" value="<%= s.hero_subtitle || '' %>">
+    </div>
+  </div>
+  <div class="form-group">
+    <label>عن المتجر</label>
+    <textarea name="about_text" rows="4"><%= s.about_text || '' %></textarea>
+  </div>
+
+  <h3>روابط التواصل الاجتماعي</h3>
+  <div class="form-grid">
+    <div class="form-group">
+      <label>فيسبوك</label>
+      <input type="text" name="fb_url" value="<%= s.fb_url || '' %>">
+    </div>
+    <div class="form-group">
+      <label>انستغرام</label>
+      <input type="text" name="insta_url" value="<%= s.insta_url || '' %>">
+    </div>
+    <div class="form-group">
+      <label>تويتر / X</label>
+      <input type="text" name="tw_url" value="<%= s.tw_url || '' %>">
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
+</form>
+
+<%- include('../partials/admin-footer') %>

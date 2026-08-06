@@ -1,0 +1,40 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card">
+  <div class="filter-bar">
+    <a href="/admin/orders" class="btn <%= !status ? 'btn-primary' : 'btn-ghost' %> btn-sm">الكل</a>
+    <% ['new', 'processing', 'shipped', 'delivered', 'cancelled'].forEach(s => { %>
+      <a href="/admin/orders?status=<%= s %>" class="btn <%= status === s ? 'btn-primary' : 'btn-ghost' %> btn-sm">
+        <%= { new: 'جديد', processing: 'قيد التجهيز', shipped: 'تم الشحن', delivered: 'تم التسليم', cancelled: 'ملغي' }[s] %>
+      </a>
+    <% }) %>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>#</th><th>العميل</th><th>الهاتف</th><th>المدينة</th><th>الإجمالي</th><th>التاريخ</th><th>الحالة</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (orders.length === 0) { %>
+          <tr><td colspan="8" class="center-text">لا توجد طلبات</td></tr>
+        <% } %>
+        <% orders.forEach(o => { %>
+          <tr>
+            <td>#<%= o.id %></td>
+            <td><%= o.name %></td>
+            <td><%= o.phone %></td>
+            <td><%= o.city %></td>
+            <td><%= o.total.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></td>
+            <td><%= new Date(o.created_at).toLocaleString('ar-EG') %></td>
+            <td><span class="status status-<%= o.status %>"><%= { new: 'جديد', processing: 'قيد التجهيز', shipped: 'تم الشحن', delivered: 'تم التسليم', cancelled: 'ملغي' }[o.status] || o.status %></span></td>
+            <td><a href="/admin/orders/<%= o.id %>" class="btn btn-ghost btn-sm">تفاصيل</a></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

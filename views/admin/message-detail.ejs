@@ -1,0 +1,19 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card">
+  <h3>رسالة من <%= message.name %></h3>
+  <p class="muted"><%= message.email %> — <%= new Date(message.created_at).toLocaleString('ar-EG') %></p>
+  <h4><%= message.subject || 'بدون موضوع' %></h4>
+  <div class="message-body">
+    <%= message.message.replace(/\n/g, '<br>') %>
+  </div>
+  <div class="form-actions">
+    <a href="mailto:<%= message.email %>" class="btn btn-primary">الرد بالبريد</a>
+    <form action="/admin/messages/<%= message.id %>/delete" method="POST" style="display:inline" onsubmit="return confirm('حذف الرسالة؟')">
+      <button class="btn btn-danger">حذف</button>
+    </form>
+    <a href="/admin/messages" class="btn btn-ghost">رجوع</a>
+  </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

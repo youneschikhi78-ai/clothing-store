@@ -1,0 +1,52 @@
+<%- include('../partials/admin-header') %>
+
+<div class="admin-toolbar">
+  <a href="/admin/products/new" class="btn btn-primary">+ منتج جديد</a>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>الصورة</th>
+          <th>الاسم</th>
+          <th>الفئة</th>
+          <th>السعر</th>
+          <th>المخزون</th>
+          <th>مميز</th>
+          <th>الحالة</th>
+          <th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (products.length === 0) { %>
+          <tr><td colspan="8" class="center-text">لا توجد منتجات</td></tr>
+        <% } %>
+        <% products.forEach(p => { %>
+          <tr>
+            <td>
+              <div class="thumb <%= p.image ? '' : 'placeholder' %>">
+                <% if (p.image) { %><img src="<%= p.image %>" alt=""><% } else { %><span><%= p.name.charAt(0) %></span><% } %>
+              </div>
+            </td>
+            <td><a href="/product/<%= p.id %>" target="_blank"><%= p.name %></a></td>
+            <td><%= p.category_name || '—' %></td>
+            <td><%= p.price.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></td>
+            <td><span class="<%= p.stock <= 5 ? 'text-danger' : '' %>"><%= p.stock %></span></td>
+            <td><%= p.featured ? '✓' : '—' %></td>
+            <td><span class="status <%= p.active ? 'status-delivered' : 'status-cancelled' %>"><%= p.active ? 'نشط' : 'مخفي' %></span></td>
+            <td class="actions-cell">
+              <a href="/admin/products/<%= p.id %>/edit" class="btn btn-ghost btn-sm">تعديل</a>
+              <form action="/admin/products/<%= p.id %>/delete" method="POST" onsubmit="return confirm('حذف المنتج نهائياً؟')">
+                <button class="btn btn-danger btn-sm">حذف</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

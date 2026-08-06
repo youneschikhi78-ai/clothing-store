@@ -1,0 +1,33 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card">
+  <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+  <form action="<%= page ? '/admin/pages/' + page.id + '/edit' : '/admin/pages/new' %>" method="POST">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>عنوان الصفحة *</label>
+        <input type="text" name="title" value="<%= page ? page.title : '' %>" required>
+      </div>
+      <div class="form-group">
+        <label>الرابط (slug) *</label>
+        <input type="text" name="slug" value="<%= page ? page.slug : '' %>" placeholder="about" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>المحتوى</label>
+      <textarea name="content" rows="10"><%= page ? page.content : '' %></textarea>
+      <p class="muted">يدعم النص العادي فقط. كل سطر جديد يظهر كسطر منفصل.</p>
+    </div>
+    <div class="checkbox-row">
+      <label class="checkbox">
+        <input type="checkbox" name="published" <%= !page || page.published ? 'checked' : '' %>> منشورة
+      </label>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">حفظ</button>
+      <a href="/admin/pages" class="btn btn-ghost">إلغاء</a>
+    </div>
+  </form>
+</div>
+
+<%- include('../partials/admin-footer') %>

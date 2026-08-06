@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title ? title + ' | ' : '' %><%= site.site_name || 'المتجر' %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👕</text></svg>">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo">
+        <span class="logo-icon">👕</span>
+        <span><%= site.site_name || 'المتجر' %></span>
+      </a>
+      <nav class="main-nav">
+        <a href="/" class="<%= typeof currentPage === 'undefined' || currentPage === 'home' ? 'active' : '' %>">الرئيسية</a>
+        <a href="/products" class="<%= typeof currentPage !== 'undefined' && currentPage === 'products' ? 'active' : '' %>">المنتجات</a>
+        <a href="/page/about">من نحن</a>
+        <a href="/contact">اتصل بنا</a>
+      </nav>
+      <div class="header-actions">
+        <a href="/cart" class="cart-link" title="سلة التسوق">
+          🛒<span class="cart-count"><%= cartCount %></span>
+        </a>
+        <% if (user) { %>
+          <div class="user-menu">
+            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('userDrop').classList.toggle('open')">
+              👤 <%= user.name %>
+            </button>
+            <div class="dropdown" id="userDrop">
+              <% if (user.role === 'admin') { %><a href="/admin">لوحة التحكم</a><% } %>
+              <a href="/orders">طلباتي</a>
+              <a href="/logout">تسجيل الخروج</a>
+            </div>
+          </div>
+        <% } else { %>
+          <a href="/login" class="btn btn-ghost btn-sm">تسجيل الدخول</a>
+          <a href="/register" class="btn btn-primary btn-sm">إنشاء حساب</a>
+        <% } %>
+      </div>
+    </div>
+  </header>
+  <main>

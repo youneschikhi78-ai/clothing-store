@@ -1,0 +1,59 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card">
+  <h3>إضافة بانر جديد</h3>
+  <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+  <form action="/admin/banners" method="POST" enctype="multipart/form-data" class="banner-form">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>العنوان *</label>
+        <input type="text" name="title" required>
+      </div>
+      <div class="form-group">
+        <label>النص الفرعي</label>
+        <input type="text" name="subtitle">
+      </div>
+      <div class="form-group">
+        <label>الرابط</label>
+        <input type="text" name="link" placeholder="/products">
+      </div>
+      <div class="form-group">
+        <label>الترتيب</label>
+        <input type="number" name="sort_order" value="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>صورة البانر</label>
+      <input type="file" name="image" accept="image/*">
+    </div>
+    <button type="submit" class="btn btn-primary">إضافة البانر</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="banner-admin-grid">
+    <% banners.forEach(b => { %>
+      <div class="banner-admin-card">
+        <div class="banner-admin-preview <%= b.image ? '' : 'placeholder' %>" style="<%= b.image ? 'background-image:url(' + b.image + ')' : '' %>">
+          <% if (!b.image) { %><span>🖼️</span><% } %>
+        </div>
+        <div class="banner-admin-info">
+          <h4><%= b.title %></h4>
+          <p class="muted"><%= b.subtitle || '' %></p>
+        </div>
+        <div class="banner-admin-actions">
+          <span class="status <%= b.active ? 'status-delivered' : 'status-cancelled' %>"><%= b.active ? 'مفعل' : 'معطل' %></span>
+          <form action="/admin/banners/<%= b.id %>/toggle" method="POST" style="display:inline">
+            <button class="btn btn-ghost btn-sm"><%= b.active ? 'إيقاف' : 'تفعيل' %></button>
+          </form>
+          <form action="/admin/banners/<%= b.id %>/delete" method="POST" style="display:inline" onsubmit="return confirm('حذف البانر؟')">
+            <button class="btn btn-danger btn-sm">حذف</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+    <% if (banners.length === 0) { %><p class="muted">لا توجد بانرات</p><% } %>
+  </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

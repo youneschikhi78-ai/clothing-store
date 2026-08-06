@@ -1,0 +1,77 @@
+<%- include('../partials/header', { currentPage: 'home' }) %>
+
+<section class="hero" style="<%= site.hero_image ? 'background-image:url(' + site.hero_image + ')' : '' %>">
+  <div class="container hero-content">
+    <h1><%= site.hero_title || 'تشكيلات موضة' %></h1>
+    <p><%= site.hero_subtitle || '' %></p>
+    <div class="hero-actions">
+      <a href="/products" class="btn btn-primary btn-lg">تسوق الآن</a>
+      <a href="#featured" class="btn btn-outline-light btn-lg">اكتشف المزيد</a>
+    </div>
+  </div>
+</section>
+
+<% if (banners.length) { %>
+<section class="banners">
+  <div class="container banner-grid">
+    <% banners.forEach(b => { %>
+      <a href="<%= b.link || '/products' %>" class="banner-card" style="<%= b.image ? 'background-image:url(' + b.image + ')' : '' %>">
+        <h3><%= b.title %></h3>
+        <% if (b.subtitle) { %><p><%= b.subtitle %></p><% } %>
+      </a>
+    <% }) %>
+  </div>
+</section>
+<% } %>
+
+<section class="categories-section">
+  <div class="container">
+    <h2 class="section-title">تسوق حسب الفئة</h2>
+    <div class="category-grid">
+      <% cats.forEach(c => { %>
+        <a href="/products?cat=<%= c.slug %>" class="category-card">
+          <div class="category-circle"><span><%= c.name.charAt(0) %></span></div>
+          <h3><%= c.name %></h3>
+          <p><%= c.description %></p>
+        </a>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<% if (featured.length) { %>
+<section class="products-section" id="featured">
+  <div class="container">
+    <h2 class="section-title">منتجات مميزة</h2>
+    <div class="products-grid">
+      <% featured.forEach(p => { %>
+        <%- include('../partials/product-card', { product: p }) %>
+      <% }) %>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<% if (newest.length) { %>
+<section class="products-section">
+  <div class="container">
+    <h2 class="section-title">وصل حديثاً</h2>
+    <div class="products-grid">
+      <% newest.forEach(p => { %>
+        <%- include('../partials/product-card', { product: p }) %>
+      <% }) %>
+    </div>
+    <div class="center-btn">
+      <a href="/products" class="btn btn-primary">عرض جميع المنتجات</a>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<section class="about-strip">
+  <div class="container">
+    <p><%= site.about_text || '' %></p>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

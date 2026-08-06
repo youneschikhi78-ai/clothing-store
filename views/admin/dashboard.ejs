@@ -1,0 +1,119 @@
+<%- include('../partials/admin-header') %>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-icon">👕</div>
+    <div class="stat-info">
+      <span class="stat-value"><%= stats.products %></span>
+      <span class="stat-label">المنتجات</span>
+    </div>
+    <a href="/admin/products" class="stat-link">إدارة →</a>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">📦</div>
+    <div class="stat-info">
+      <span class="stat-value"><%= stats.orders %></span>
+      <span class="stat-label">الطلبات</span>
+    </div>
+    <a href="/admin/orders" class="stat-link">إدارة →</a>
+  </div>
+  <div class="stat-card <%= stats.newOrders > 0 ? 'highlight' : '' %>">
+    <div class="stat-icon">🆕</div>
+    <div class="stat-info">
+      <span class="stat-value"><%= stats.newOrders %></span>
+      <span class="stat-label">طلبات جديدة</span>
+    </div>
+    <a href="/admin/orders?status=new" class="stat-link">عرض →</a>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">👥</div>
+    <div class="stat-info">
+      <span class="stat-value"><%= stats.customers %></span>
+      <span class="stat-label">العملاء</span>
+    </div>
+    <a href="/admin/customers" class="stat-link">إدارة →</a>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">💰</div>
+    <div class="stat-info">
+      <span class="stat-value"><%= stats.revenue.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+      <span class="stat-label">إجمالي المبيعات</span>
+    </div>
+  </div>
+  <div class="stat-card <%= stats.lowStock > 0 ? 'highlight warn' : '' %>">
+    <div class="stat-icon">⚠️</div>
+    <div class="stat-info">
+      <span class="stat-value"><%= stats.lowStock %></span>
+      <span class="stat-label">مخزون منخفض</span>
+    </div>
+    <a href="/admin/products" class="stat-link">مراجعة →</a>
+  </div>
+</div>
+
+<div class="admin-grid-2">
+  <div class="card">
+    <h3>أحدث الطلبات</h3>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>#</th><th>العميل</th><th>الإجمالي</th><th>الحالة</th><th></th></tr>
+        </thead>
+        <tbody>
+          <% if (recentOrders.length === 0) { %>
+            <tr><td colspan="5" class="center-text">لا توجد طلبات</td></tr>
+          <% } %>
+          <% recentOrders.forEach(o => { %>
+            <tr>
+              <td>#<%= o.id %></td>
+              <td><%= o.name %></td>
+              <td><%= o.total.toLocaleString('ar-EG') %></td>
+              <td><span class="status status-<%= o.status %>"><%= o.status %></span></td>
+              <td><a href="/admin/orders/<%= o.id %>" class="btn btn-ghost btn-sm">عرض</a></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>الأكثر مبيعاً</h3>
+    <% if (topProducts.length === 0) { %>
+      <p class="muted">لا توجد بيانات بعد</p>
+    <% } %>
+    <% topProducts.forEach((p, i) => { %>
+      <div class="top-product">
+        <span class="top-rank"><%= i + 1 %></span>
+        <span class="top-name"><%= p.product_name %></span>
+        <span class="top-qty"><%= p.qty %> قطعة</span>
+      </div>
+    <% }) %>
+  </div>
+
+  <div class="card">
+    <h3>أحدث الرسائل</h3>
+    <% if (recentMessages.length === 0) { %>
+      <p class="muted">لا توجد رسائل</p>
+    <% } %>
+    <% recentMessages.forEach(m => { %>
+      <div class="message-row <%= m.read ? '' : 'unread' %>">
+        <strong><%= m.name %></strong>
+        <span class="muted"><%= m.subject || 'بدون موضوع' %></span>
+        <span class="muted"><%= new Date(m.created_at).toLocaleDateString('ar-EG') %></span>
+        <a href="/admin/messages/<%= m.id %>" class="btn btn-ghost btn-sm">عرض</a>
+      </div>
+    <% }) %>
+  </div>
+
+  <div class="card">
+    <h3>إجراءات سريعة</h3>
+    <div class="quick-actions">
+      <a href="/admin/products/new" class="btn btn-primary">+ إضافة منتج</a>
+      <a href="/admin/categories" class="btn btn-ghost">+ إضافة فئة</a>
+      <a href="/admin/pages/new" class="btn btn-ghost">+ صفحة جديدة</a>
+      <a href="/admin/banners" class="btn btn-ghost">+ بانر جديد</a>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

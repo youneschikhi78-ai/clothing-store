@@ -1,0 +1,29 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>العميل</th><th>البريد الإلكتروني</th><th>الطلبات</th><th>إجمالي الإنفاق</th><th>تاريخ التسجيل</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (customers.length === 0) { %>
+          <tr><td colspan="5" class="center-text">لا يوجد عملاء بعد</td></tr>
+        <% } %>
+        <% customers.forEach(c => { %>
+          <tr>
+            <td><%= c.name %></td>
+            <td><%= c.email %></td>
+            <td><%= c.order_count %></td>
+            <td><%= c.total_spent.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></td>
+            <td><%= new Date(c.created_at).toLocaleDateString('ar-EG') %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

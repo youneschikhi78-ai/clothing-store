@@ -1,0 +1,69 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card">
+  <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+  <form action="<%= product ? '/admin/products/' + product.id + '/edit' : '/admin/products/new' %>" method="POST" enctype="multipart/form-data">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>اسم المنتج *</label>
+        <input type="text" name="name" value="<%= product ? product.name : '' %>" required>
+      </div>
+      <div class="form-group">
+        <label>الفئة</label>
+        <select name="category_id">
+          <option value="">بدون فئة</option>
+          <% categories.forEach(c => { %>
+            <option value="<%= c.id %>" <%= product && product.category_id === c.id ? 'selected' : '' %>><%= c.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>السعر *</label>
+        <input type="number" step="0.01" min="0" name="price" value="<%= product ? product.price : '' %>" required>
+      </div>
+      <div class="form-group">
+        <label>السعر قبل الخصم</label>
+        <input type="number" step="0.01" min="0" name="old_price" value="<%= product && product.old_price ? product.old_price : '' %>">
+      </div>
+      <div class="form-group">
+        <label>المخزون *</label>
+        <input type="number" min="0" name="stock" value="<%= product ? product.stock : '' %>" required>
+      </div>
+      <div class="form-group">
+        <label>رابط صورة (اختياري)</label>
+        <input type="text" name="image_url" value="<%= product && product.image && !product.image.startsWith('/uploads/') ? product.image : '' %>">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>الوصف</label>
+      <textarea name="description" rows="4"><%= product ? product.description : '' %></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>صورة المنتج</label>
+      <input type="file" name="image" accept="image/*">
+      <% if (product && product.image) { %>
+        <div class="thumb" style="margin-top:8px"><img src="<%= product.image %>" alt=""></div>
+      <% } %>
+    </div>
+
+    <div class="checkbox-row">
+      <label class="checkbox">
+        <input type="checkbox" name="featured" <%= product && product.featured ? 'checked' : '' %>> منتج مميز
+      </label>
+      <% if (product) { %>
+        <label class="checkbox">
+          <input type="checkbox" name="active" <%= product.active ? 'checked' : '' %>> ظاهر في المتجر
+        </label>
+      <% } %>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">حفظ</button>
+      <a href="/admin/products" class="btn btn-ghost">إلغاء</a>
+    </div>
+  </form>
+</div>
+
+<%- include('../partials/admin-footer') %>

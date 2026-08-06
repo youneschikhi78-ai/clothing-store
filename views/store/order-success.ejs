@@ -1,0 +1,31 @@
+<%- include('../partials/header') %>
+
+<div class="container success-page">
+  <div class="card center-text">
+    <div class="success-icon">✓</div>
+    <h1>تم استلام طلبك بنجاح!</h1>
+    <p>شكراً لك <%= order.name %>، رقم الطلب: <strong>#<%= order.id %></strong></p>
+    <p>سنتواصل معك قريباً لتأكيد التوصيل.</p>
+
+    <div class="order-summary-card">
+      <% items.forEach(it => { %>
+        <div class="summary-row">
+          <span><%= it.product_name %> × <%= it.qty %></span>
+          <span><%= (it.price * it.qty).toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+        </div>
+      <% }) %>
+      <hr>
+      <div class="summary-row total">
+        <span>الإجمالي</span>
+        <span><%= order.total.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+      </div>
+    </div>
+
+    <div class="center-btn">
+      <a href="/orders" class="btn btn-primary">متابعة طلباتي</a>
+      <a href="/" class="btn btn-ghost">العودة للرئيسية</a>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,32 @@
+<%- include('../partials/admin-header') %>
+
+<div class="admin-toolbar">
+  <a href="/admin/pages/new" class="btn btn-primary">+ صفحة جديدة</a>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th>العنوان</th><th>الرابط</th><th>الحالة</th><th>إجراءات</th></tr>
+      </thead>
+      <tbody>
+        <% pages.forEach(p => { %>
+          <tr>
+            <td><%= p.title %></td>
+            <td><a href="/page/<%= p.slug %>" target="_blank">/<%= p.slug %></a></td>
+            <td><span class="status <%= p.published ? 'status-delivered' : 'status-cancelled' %>"><%= p.published ? 'منشورة' : 'مسودة' %></span></td>
+            <td class="actions-cell">
+              <a href="/admin/pages/<%= p.id %>/edit" class="btn btn-ghost btn-sm">تعديل</a>
+              <form action="/admin/pages/<%= p.id %>/delete" method="POST" onsubmit="return confirm('حذف الصفحة؟')">
+                <button class="btn btn-danger btn-sm">حذف</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

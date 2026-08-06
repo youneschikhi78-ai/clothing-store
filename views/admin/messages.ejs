@@ -1,0 +1,33 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th>الاسم</th><th>البريد</th><th>الموضوع</th><th>التاريخ</th><th>الحالة</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% if (messages.length === 0) { %>
+          <tr><td colspan="6" class="center-text">لا توجد رسائل</td></tr>
+        <% } %>
+        <% messages.forEach(m => { %>
+          <tr class="<%= m.read ? '' : 'row-unread' %>">
+            <td><%= m.name %></td>
+            <td><%= m.email %></td>
+            <td><%= m.subject || '—' %></td>
+            <td><%= new Date(m.created_at).toLocaleString('ar-EG') %></td>
+            <td><%= m.read ? 'مقروءة' : 'جديدة' %></td>
+            <td class="actions-cell">
+              <a href="/admin/messages/<%= m.id %>" class="btn btn-ghost btn-sm">عرض</a>
+              <form action="/admin/messages/<%= m.id %>/delete" method="POST" onsubmit="return confirm('حذف الرسالة؟')">
+                <button class="btn btn-danger btn-sm">حذف</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

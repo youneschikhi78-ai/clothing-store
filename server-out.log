@@ -1,0 +1,7 @@
+✓ قاعدة البيانات جاهزة
+
+✓ المتجر يعمل الآن
+  المتجر:   http://localhost:3000
+  لوحة التحكم: http://localhost:3000/admin/login
+  بيانات المدير: admin@store.com / admin123
+

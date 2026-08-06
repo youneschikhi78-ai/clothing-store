@@ -1,0 +1,54 @@
+<%- include('../partials/admin-header') %>
+
+<div class="admin-grid-2">
+  <div class="card">
+    <h3>تفاصيل الطلب #<%= order.id %></h3>
+    <div class="order-meta">
+      <div><span>العميل:</span> <%= order.name %></div>
+      <div><span>الهاتف:</span> <%= order.phone %></div>
+      <div><span>المدينة:</span> <%= order.city %></div>
+      <div><span>العنوان:</span> <%= order.address %></div>
+      <% if (order.notes) { %><div><span>ملاحظات:</span> <%= order.notes %></div><% } %>
+      <div><span>التاريخ:</span> <%= new Date(order.created_at).toLocaleString('ar-EG') %></div>
+    </div>
+    <table class="table">
+      <thead>
+        <tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr>
+      </thead>
+      <tbody>
+        <% items.forEach(it => { %>
+          <tr>
+            <td><%= it.product_name %></td>
+            <td><%= it.qty %></td>
+            <td><%= it.price.toLocaleString('ar-EG') %></td>
+            <td><%= (it.price * it.qty).toLocaleString('ar-EG') %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <div class="summary-row total">
+      <span>الإجمالي</span>
+      <span><%= order.total.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>تحديث حالة الطلب</h3>
+    <form action="/admin/orders/<%= order.id %>/status" method="POST">
+      <div class="form-group">
+        <select name="status">
+          <% ['new', 'processing', 'shipped', 'delivered', 'cancelled'].forEach(s => { %>
+            <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>>
+              <%= { new: 'جديد', processing: 'قيد التجهيز', shipped: 'تم الشحن', delivered: 'تم التسليم', cancelled: 'ملغي' }[s] %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">تحديث الحالة</button>
+    </form>
+    <hr>
+    <p><span class="status status-<%= order.status %>"><%= order.status %></span></p>
+  </div>
+</div>
+
+<%- include('../partials/admin-footer') %>
