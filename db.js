@@ -102,16 +102,42 @@ if (!userCols.some(c => c.name === 'banned')) {
   console.log('✓ تمت ترقية قاعدة البيانات (عمود banned)');
 }
 
+const SCRYPT = { N: 1 << 17, r: 8, p: 1, maxmem: 256 * 1024 * 1024 };
+const SCRYPT_LEGACY = { N: 1 << 14, r: 8, p: 1, maxmem: 64 * 1024 * 1024 };
+
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString('hex');
-  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
-  return `${salt}:${hash}`;
+  const hash = crypto.scryptSync(password, salt, 64, SCRYPT).toString('hex');
+  return `scrypt$${SCRYPT.N}$${salt}$${hash}`;
 }
 
 function verifyPassword(password, stored) {
-  const [salt, hash] = stored.split(':');
-  const candidate = crypto.scryptSync(password, salt, 64).toString('hex');
-  return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(candidate, 'hex'));
+  if (typeof stored !== 'string' || !stored) return false;
+  const parts = stored.split('$');
+  let N, salt, hash;
+  let opts;
+
+  if (parts.length === 4 && parts[0] === 'scrypt') {
+    N = parseInt(parts[1], 10) || SCRYPT.N;
+    salt = parts[2];
+    hash = parts[3];
+    opts = { r: 8, p: 1, maxmem: 256 * 1024 * 1024 };
+  } else if (!stored.includes('$')) {
+    const idx = stored.lastIndexOf(':');
+    if (idx <= 0) return false;
+    salt = stored.slice(0, idx);
+    hash = stored.slice(idx + 1);
+    N = SCRYPT_LEGACY.N;
+    opts = SCRYPT_LEGACY;
+  } else {
+    return false;
+  }
+
+  if (!/^[0-9a-f]{128}$/.test(hash)) return false;
+  const candidate = crypto.scryptSync(password, salt, 64, { ...opts, N }).toString('hex');
+  const a = Buffer.from(hash, 'hex');
+  const b = Buffer.from(candidate, 'hex');
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 function slugify(text) {

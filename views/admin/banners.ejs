@@ -3,6 +3,8 @@
 <div class="card">
   <h3>إضافة بانر جديد</h3>
   <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+  <% if (upload === 'size') { %><div class="alert alert-danger">حجم الصورة يتجاوز 3 ميجابايت</div><% } %>
+  <% if (upload === 'format') { %><div class="alert alert-danger">صيغة الصورة غير مدعومة</div><% } %>
   <form action="/admin/banners" method="POST" enctype="multipart/form-data" class="banner-form">
     <div class="form-grid">
       <div class="form-group">

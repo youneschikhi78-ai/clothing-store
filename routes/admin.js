@@ -4,6 +4,7 @@ const path = require('path');
 const multer = require('multer');
 const { db, slugify } = require('../db');
 const { isAdmin } = require('../middleware/auth');
+const { cleanNumber } = require('../middleware/security');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, path.join(__dirname, '..', 'public', 'uploads')),
@@ -14,12 +15,21 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
   storage,
-  limits: { fileSize: 3 * 1024 * 1024 },
+  limits: { fileSize: 3 * 1024 * 1024, files: 1 },
   fileFilter: (req, file, cb) => {
     if (/image\/(png|jpe?g|gif|webp|svg)/.test(file.mimetype)) cb(null, true);
     else cb(new Error('صيغة الصورة غير مدعومة'));
   },
 });
+
+function handleUploadError(err, req, res, next) {
+  if (err) {
+    const fallback = req.path || '/admin/products';
+    if (err.code === 'LIMIT_FILE_SIZE') return res.redirect(fallback + '?upload=size');
+    return res.redirect(fallback + '?upload=format');
+  }
+  next();
+}
 
 router.use(isAdmin);
 router.use((req, res, next) => {
@@ -66,13 +76,19 @@ router.get('/products', (req, res) => {
 
 router.get('/products/new', (req, res) => {
   const categories = db.prepare('SELECT * FROM categories ORDER BY name').all();
-  res.render('admin/product-form', { title: 'منتج جديد', layout: 'admin', product: null, categories, error: null });
+  res.render('admin/product-form', { title: 'منتج جديد', layout: 'admin', product: null, categories, error: null, upload: req.query.upload });
 });
 
-router.post('/products/new', upload.single('image'), (req, res) => {
+router.post('/products/new', upload.single('image'), handleUploadError, (req, res) => {
   const { name, category_id, description, price, old_price, stock, featured } = req.body;
   let error = null;
-  if (!name || !price || stock === '') error = 'الاسم والسعر والمخزون حقول مطلوبة';
+  if (!name || price === '' || price === undefined || stock === '' || stock === undefined) {
+    error = 'الاسم والسعر والمخزون حقول مطلوبة';
+  } else if (name.length < 2 || name.length > 200) {
+    error = 'اسم المنتج غير صالح';
+  } else if (cleanNumber(price) <= 0 || cleanNumber(stock) < 0) {
+    error = 'السعر أو المخزون غير صالح';
+  }
 
   const image = req.file ? '/uploads/' + req.file.filename : (req.body.image_url || '');
   if (error) {
@@ -83,8 +99,8 @@ router.post('/products/new', upload.single('image'), (req, res) => {
   db.prepare(
     'INSERT INTO products (name, slug, category_id, description, price, old_price, stock, image, featured, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)'
   ).run(
-    name, slugify(name), category_id || null, description || '', parseFloat(price), old_price ? parseFloat(old_price) : null,
-    parseInt(stock, 10) || 0, image, featured ? 1 : 0
+    name, slugify(name), category_id || null, description || '', cleanNumber(price),
+    old_price ? cleanNumber(old_price) : null, cleanNumber(stock), image, featured ? 1 : 0
   );
   res.redirect('/admin/products');
 });
@@ -93,17 +109,23 @@ router.get('/products/:id/edit', (req, res) => {
   const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
   if (!product) return res.redirect('/admin/products');
   const categories = db.prepare('SELECT * FROM categories ORDER BY name').all();
-  res.render('admin/product-form', { title: 'تعديل منتج', layout: 'admin', product, categories, error: null });
+  res.render('admin/product-form', { title: 'تعديل منتج', layout: 'admin', product, categories, error: null, upload: req.query.upload });
 });
 
-router.post('/products/:id/edit', upload.single('image'), (req, res) => {
+router.post('/products/:id/edit', upload.single('image'), handleUploadError, (req, res) => {
   const id = req.params.id;
   const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
   if (!existing) return res.redirect('/admin/products');
 
   const { name, category_id, description, price, old_price, stock, featured, active } = req.body;
   let error = null;
-  if (!name || !price || stock === '') error = 'الاسم والسعر والمخزون حقول مطلوبة';
+  if (!name || price === '' || price === undefined || stock === '' || stock === undefined) {
+    error = 'الاسم والسعر والمخزون حقول مطلوبة';
+  } else if (name.length < 2 || name.length > 200) {
+    error = 'اسم المنتج غير صالح';
+  } else if (cleanNumber(price) <= 0 || cleanNumber(stock) < 0) {
+    error = 'السعر أو المخزون غير صالح';
+  }
 
   const image = req.file ? '/uploads/' + req.file.filename : (req.body.image_url || existing.image);
   if (error) {
@@ -114,8 +136,8 @@ router.post('/products/:id/edit', upload.single('image'), (req, res) => {
   db.prepare(
     'UPDATE products SET name=?, slug=?, category_id=?, description=?, price=?, old_price=?, stock=?, image=?, featured=?, active=? WHERE id=?'
   ).run(
-    name, slugify(name), category_id || null, description || '', parseFloat(price), old_price ? parseFloat(old_price) : null,
-    parseInt(stock, 10) || 0, image, featured ? 1 : 0, active ? 1 : 0, id
+    name, slugify(name), category_id || null, description || '', cleanNumber(price),
+    old_price ? cleanNumber(old_price) : null, cleanNumber(stock), image, featured ? 1 : 0, active ? 1 : 0, id
   );
   res.redirect('/admin/products');
 });
@@ -222,10 +244,10 @@ router.post('/messages/:id/delete', (req, res) => {
 /* ---------- البانرات ---------- */
 router.get('/banners', (req, res) => {
   const banners = db.prepare('SELECT * FROM banners ORDER BY sort_order, id').all();
-  res.render('admin/banners', { title: 'البانرات', layout: 'admin', banners, error: null });
+  res.render('admin/banners', { title: 'البانرات', layout: 'admin', banners, error: null, upload: req.query.upload });
 });
 
-router.post('/banners', upload.single('image'), (req, res) => {
+router.post('/banners', upload.single('image'), handleUploadError, (req, res) => {
   const { title, subtitle, link, sort_order } = req.body;
   if (!title) {
     const banners = db.prepare('SELECT * FROM banners ORDER BY sort_order, id').all();
@@ -233,7 +255,7 @@ router.post('/banners', upload.single('image'), (req, res) => {
   }
   const image = req.file ? '/uploads/' + req.file.filename : '';
   db.prepare('INSERT INTO banners (title, subtitle, image, link, sort_order) VALUES (?, ?, ?, ?, ?)')
-    .run(title, subtitle || '', image, link || '', parseInt(sort_order, 10) || 0);
+    .run(title, subtitle || '', image, link || '', cleanNumber(sort_order));
   res.redirect('/admin/banners');
 });
 
@@ -309,7 +331,15 @@ router.post('/settings', (req, res) => {
   ];
   const upsert = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value');
   for (const key of allowed) {
-    if (req.body[key] !== undefined) upsert.run(key, String(req.body[key]).trim());
+    if (req.body[key] === undefined) continue;
+    const value = String(req.body[key]).trim();
+    if (key === 'shipping_fee' || key === 'free_shipping_over') {
+      upsert.run(key, String(cleanNumber(value)));
+    } else if (value.length > 500) {
+      continue;
+    } else {
+      upsert.run(key, value);
+    }
   }
   res.redirect('/admin/settings?saved=1');
 });
@@ -324,13 +354,15 @@ router.post('/profile', (req, res) => {
   let error = null;
 
   if (new_password && new_password.length < 6) error = 'كلمة المرور الجديدة قصيرة جداً';
+  else if (new_password && new_password.length > 128) error = 'كلمة المرور الجديدة طويلة جداً';
+  if (name && (name.length < 2 || name.length > 100)) error = 'الاسم غير صالح';
   if (!error && current_password) {
     const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.session.user.id);
     const { verifyPassword, hashPassword } = require('../db');
     if (!verifyPassword(current_password, user.password_hash)) error = 'كلمة المرور الحالية غير صحيحة';
     else db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hashPassword(new_password), user.id);
   }
-  if (name) {
+  if (!error && name) {
     db.prepare('UPDATE users SET name = ? WHERE id = ?').run(name, req.session.user.id);
     req.session.user.name = name;
   }

@@ -2,6 +2,8 @@
 
 <div class="card">
   <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+  <% if (upload === 'size') { %><div class="alert alert-danger">حجم الصورة يتجاوز 3 ميجابايت</div><% } %>
+  <% if (upload === 'format') { %><div class="alert alert-danger">صيغة الصورة غير مدعومة</div><% } %>
   <form action="<%= product ? '/admin/products/' + product.id + '/edit' : '/admin/products/new' %>" method="POST" enctype="multipart/form-data">
     <div class="form-grid">
       <div class="form-group">

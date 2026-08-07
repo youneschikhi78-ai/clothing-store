@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { db, hashPassword, verifyPassword, slugify } = require('../db');
-const { isGuest, isLoggedIn } = require('../middleware/auth');
+const { db, hashPassword, verifyPassword } = require('../db');
+const { isGuest } = require('../middleware/auth');
+const { isValidEmail, loginLimiter, resetLoginAttempts } = require('../middleware/security');
 
 router.get('/login', isGuest, (req, res) => {
   res.render('store/login', {
@@ -13,7 +14,17 @@ router.get('/login', isGuest, (req, res) => {
   });
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', loginLimiter, (req, res) => {
+  if (req.rateLock) {
+    return res.render('store/login', {
+      title: 'تسجيل الدخول',
+      layout: 'store',
+      error: `محاولات دخول كثيرة. جرب مرة أخرى بعد ${req.rateLock} دقيقة.`,
+      next: req.body.next || '/',
+      cartCount: 0,
+    });
+  }
+
   const { email, password, next } = req.body;
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
 
@@ -32,6 +43,7 @@ router.post('/login', (req, res) => {
     });
   }
 
+  resetLoginAttempts(res);
   req.session.user = { id: user.id, name: user.name, email: user.email, role: user.role };
   res.redirect(user.role === 'admin' ? '/admin' : (next && next !== '/admin/login' ? next : '/'));
 });
@@ -50,8 +62,10 @@ router.post('/register', (req, res) => {
   let error = null;
 
   if (!name || !email || !password) error = 'يرجى ملء جميع الحقول';
-  else if (!/^\S+@\S+\.\S+$/.test(email)) error = 'البريد الإلكتروني غير صالح';
+  else if (name.length < 2) error = 'الاسم قصير جداً';
+  else if (!isValidEmail(email)) error = 'البريد الإلكتروني غير صالح';
   else if (password.length < 6) error = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+  else if (password.length > 128) error = 'كلمة المرور طويلة جداً';
   else if (password !== confirm) error = 'كلمتا المرور غير متطابقتين';
   else if (db.prepare('SELECT id FROM users WHERE email = ?').get(email)) error = 'هذا البريد مسجل مسبقاً';
 

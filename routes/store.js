@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { db, slugify } = require('../db');
 const { isLoggedIn } = require('../middleware/auth');
+const { isValidEmail, isValidPhone, cleanNumber } = require('../middleware/security');
 
 function settings() {
   const rows = db.prepare('SELECT key, value FROM settings').all();
@@ -152,7 +153,10 @@ router.post('/checkout', isLoggedIn, (req, res) => {
   const { name, phone, city, address, notes } = req.body;
   let error = null;
   if (!name || !phone || !city || !address) error = 'يرجى ملء جميع الحقول المطلوبة';
-  else if (!/^\d{6,}$/.test(phone.replace(/[^0-9]/g, ''))) error = 'رقم الهاتف غير صالح';
+  else if (name.length < 2 || name.length > 100) error = 'الاسم غير صالح';
+  else if (!isValidPhone(phone)) error = 'رقم الهاتف غير صالح';
+  else if (city.length < 2 || city.length > 60) error = 'المدينة غير صالحة';
+  else if (address.length < 5 || address.length > 300) error = 'العنوان غير صالح';
 
   const shipping = parseFloat(res.locals.site.shipping_fee) || 0;
   const freeOver = parseFloat(res.locals.site.free_shipping_over) || 0;
@@ -221,7 +225,9 @@ router.post('/contact', (req, res) => {
   const { name, email, subject, message } = req.body;
   let error = null;
   if (!name || !email || !message) error = 'يرجى ملء جميع الحقول المطلوبة';
-  else if (!/^\S+@\S+\.\S+$/.test(email)) error = 'البريد الإلكتروني غير صالح';
+  else if (!isValidEmail(email)) error = 'البريد الإلكتروني غير صالح';
+  else if (name.length < 2 || name.length > 100) error = 'الاسم غير صالح';
+  else if (message.length < 2 || message.length > 2000) error = 'الرسالة طويلة جداً';
 
   if (error) {
     return res.render('store/contact', { title: 'اتصل بنا', layout: 'store', success: null, error });
