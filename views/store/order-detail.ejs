@@ -14,21 +14,23 @@
       <div><span>العنوان:</span> <%= order.city %> — <%= order.address %></div>
       <% if (order.notes) { %><div><span>ملاحظات:</span> <%= order.notes %></div><% } %>
     </div>
-    <table class="table">
-      <thead>
-        <tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr>
-      </thead>
-      <tbody>
-        <% items.forEach(it => { %>
-          <tr>
-            <td><%= it.product_name %></td>
-            <td><%= it.qty %></td>
-            <td><%= it.price.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></td>
-            <td><%= (it.price * it.qty).toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr>
+        </thead>
+        <tbody>
+          <% items.forEach(it => { %>
+            <tr>
+              <td><%= it.product_name %></td>
+              <td><%= it.qty %></td>
+              <td><%= it.price.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></td>
+              <td><%= (it.price * it.qty).toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
     <div class="summary-row total">
       <span>الإجمالي</span>
       <span><%= order.total.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
