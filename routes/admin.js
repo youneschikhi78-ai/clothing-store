@@ -24,7 +24,7 @@ const upload = multer({
 
 function handleUploadError(err, req, res, next) {
   if (err) {
-    const fallback = req.path || '/admin/products';
+    const fallback = (req.originalUrl || req.url || '/admin/products').split('?')[0];
     if (err.code === 'LIMIT_FILE_SIZE') return res.redirect(fallback + '?upload=size');
     return res.redirect(fallback + '?upload=format');
   }

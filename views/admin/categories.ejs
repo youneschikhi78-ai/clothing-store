@@ -3,8 +3,8 @@
 <div class="card">
   <h3>إضافة فئة جديدة</h3>
   <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
-  <% if (upload === 'size') { %><div class="alert alert-danger">حجم الصورة يتجاوز 3 ميجابايت</div><% } %>
-  <% if (upload === 'format') { %><div class="alert alert-danger">صيغة الصورة غير مدعومة</div><% } %>
+  <% if (typeof upload !== 'undefined' && upload === 'size') { %><div class="alert alert-danger">حجم الصورة يتجاوز 3 ميجابايت</div><% } %>
+  <% if (typeof upload !== 'undefined' && upload === 'format') { %><div class="alert alert-danger">صيغة الصورة غير مدعومة</div><% } %>
   <form action="/admin/categories" method="POST" enctype="multipart/form-data" class="inline-form">
     <input type="text" name="name" placeholder="اسم الفئة" required>
     <input type="text" name="description" placeholder="وصف مختصر (اختياري)">
