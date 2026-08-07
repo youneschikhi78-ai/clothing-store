@@ -15,7 +15,7 @@
             <td><%= m.name %></td>
             <td><%= m.email %></td>
             <td><%= m.subject || '—' %></td>
-            <td><%= new Date(m.created_at).toLocaleString('ar-EG') %></td>
+            <td><%= new Date(m.created_at).toLocaleString('ar-EG-u-nu-latn') %></td>
             <td><%= m.read ? 'مقروءة' : 'جديدة' %></td>
             <td class="actions-cell">
               <a href="/admin/messages/<%= m.id %>" class="btn btn-ghost btn-sm">عرض</a>

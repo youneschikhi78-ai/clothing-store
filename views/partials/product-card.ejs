@@ -21,9 +21,9 @@ const hasDiscount = p.old_price && p.old_price > p.price;
     <h3><%= p.name %></h3>
     <p class="product-category"><%= p.category_name || '' %></p>
     <div class="product-price">
-      <span class="price-current"><%= p.price.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+      <span class="price-current"><%= p.price.toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %></span>
       <% if (hasDiscount) { %>
-        <span class="price-old"><%= p.old_price.toLocaleString('ar-EG') %></span>
+        <span class="price-old"><%= p.old_price.toLocaleString('ar-EG-u-nu-latn') %></span>
       <% } %>
     </div>
   </div>

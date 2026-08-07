@@ -32,7 +32,7 @@
             </td>
             <td><a href="/product/<%= p.id %>" target="_blank"><%= p.name %></a></td>
             <td><%= p.category_name || '—' %></td>
-            <td><%= p.price.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></td>
+            <td><%= p.price.toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %></td>
             <td><span class="<%= p.stock <= 5 ? 'text-danger' : '' %>"><%= p.stock %></span></td>
             <td><%= p.featured ? '✓' : '—' %></td>
             <td><span class="status <%= p.active ? 'status-delivered' : 'status-cancelled' %>"><%= p.active ? 'نشط' : 'مخفي' %></span></td>

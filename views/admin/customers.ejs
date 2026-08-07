@@ -17,13 +17,13 @@
             <td><%= c.name %></td>
             <td><%= c.email %></td>
             <td><%= c.order_count %></td>
-            <td><%= c.total_spent.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></td>
+            <td><%= c.total_spent.toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %></td>
             <td>
               <span class="status <%= c.banned ? 'status-cancelled' : 'status-delivered' %>">
                 <%= c.banned ? 'محظور' : 'نشط' %>
               </span>
             </td>
-            <td><%= new Date(c.created_at).toLocaleDateString('ar-EG') %></td>
+            <td><%= new Date(c.created_at).toLocaleDateString('ar-EG-u-nu-latn') %></td>
             <td>
               <form action="/admin/customers/<%= c.id %>/ban" method="POST" onsubmit="return confirm('<%= c.banned ? 'إلغاء حظر' : 'حظر' %> العميل <%= c.name %>؟')">
                 <button class="btn <%= c.banned ? 'btn-ghost' : 'btn-danger' %> btn-sm">

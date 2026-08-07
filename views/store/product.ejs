@@ -17,9 +17,9 @@
     </p>
     <h1><%= product.name %></h1>
     <div class="product-price">
-      <span class="price-current"><%= product.price.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+      <span class="price-current"><%= product.price.toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %></span>
       <% if (product.old_price && product.old_price > product.price) { %>
-        <span class="price-old"><%= product.old_price.toLocaleString('ar-EG') %></span>
+        <span class="price-old"><%= product.old_price.toLocaleString('ar-EG-u-nu-latn') %></span>
         <span class="badge badge-sale">خصم <%= Math.round((1 - product.price / product.old_price) * 100) %>%</span>
       <% } %>
     </div>

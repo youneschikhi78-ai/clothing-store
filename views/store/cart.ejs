@@ -20,7 +20,7 @@
             </div>
             <div class="cart-item-info">
               <h3><a href="/product/<%= it.id %>"><%= it.name %></a></h3>
-              <span class="price-current"><%= it.price.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+              <span class="price-current"><%= it.price.toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %></span>
             </div>
             <form action="/cart/update" method="POST" class="qty-control">
               <input type="hidden" name="id" value="<%= it.id %>">
@@ -28,7 +28,7 @@
               <button type="submit" class="btn btn-ghost btn-sm">تحديث</button>
             </form>
             <div class="cart-item-total">
-              <%= (it.price * it.qty).toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %>
+              <%= (it.price * it.qty).toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %>
             </div>
             <form action="/cart/remove" method="POST">
               <input type="hidden" name="id" value="<%= it.id %>">
@@ -41,7 +41,7 @@
         <h3>ملخص الطلب</h3>
         <div class="summary-row">
           <span>المنتجات</span>
-          <span><%= cart.total.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+          <span><%= cart.total.toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %></span>
         </div>
         <div class="summary-row">
           <span>الشحن</span>
@@ -50,7 +50,7 @@
         <hr>
         <div class="summary-row total">
           <span>الإجمالي</span>
-          <span><%= cart.total.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+          <span><%= cart.total.toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %></span>
         </div>
         <a href="/checkout" class="btn btn-primary btn-block">إتمام الطلب</a>
         <a href="/products" class="btn btn-ghost btn-block">متابعة التسوق</a>

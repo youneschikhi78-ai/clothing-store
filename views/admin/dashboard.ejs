@@ -36,7 +36,7 @@
   <div class="stat-card">
     <div class="stat-icon">💰</div>
     <div class="stat-info">
-      <span class="stat-value"><%= stats.revenue.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+      <span class="stat-value"><%= stats.revenue.toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %></span>
       <span class="stat-label">إجمالي المبيعات</span>
     </div>
   </div>
@@ -66,7 +66,7 @@
             <tr>
               <td>#<%= o.id %></td>
               <td><%= o.name %></td>
-              <td><%= o.total.toLocaleString('ar-EG') %></td>
+              <td><%= o.total.toLocaleString('ar-EG-u-nu-latn') %></td>
               <td><span class="status status-<%= o.status %>"><%= o.status %></span></td>
               <td><a href="/admin/orders/<%= o.id %>" class="btn btn-ghost btn-sm">عرض</a></td>
             </tr>
@@ -85,7 +85,7 @@
       <div class="top-product">
         <span class="top-rank"><%= i + 1 %></span>
         <span class="top-name"><%= p.product_name %></span>
-        <span class="top-qty"><%= p.qty %> قطعة — <%= p.revenue.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+        <span class="top-qty"><%= p.qty %> قطعة — <%= p.revenue.toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %></span>
       </div>
     <% }) %>
   </div>
@@ -99,7 +99,7 @@
       <div class="message-row <%= m.read ? '' : 'unread' %>">
         <strong><%= m.name %></strong>
         <span class="muted"><%= m.subject || 'بدون موضوع' %></span>
-        <span class="muted"><%= new Date(m.created_at).toLocaleDateString('ar-EG') %></span>
+        <span class="muted"><%= new Date(m.created_at).toLocaleDateString('ar-EG-u-nu-latn') %></span>
         <a href="/admin/messages/<%= m.id %>" class="btn btn-ghost btn-sm">عرض</a>
       </div>
     <% }) %>

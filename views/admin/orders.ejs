@@ -26,8 +26,8 @@
             <td><%= o.name %></td>
             <td><%= o.phone %></td>
             <td><%= o.city %></td>
-            <td><%= o.total.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></td>
-            <td><%= new Date(o.created_at).toLocaleString('ar-EG') %></td>
+            <td><%= o.total.toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %></td>
+            <td><%= new Date(o.created_at).toLocaleString('ar-EG-u-nu-latn') %></td>
             <td><span class="status status-<%= o.status %>"><%= { new: 'جديد', processing: 'قيد التجهيز', shipped: 'تم الشحن', delivered: 'تم التسليم', cancelled: 'ملغي' }[o.status] || o.status %></span></td>
             <td class="actions-cell">
               <a href="/admin/orders/<%= o.id %>" class="btn btn-ghost btn-sm">تفاصيل</a>

@@ -9,7 +9,7 @@
       <div><span>المدينة:</span> <%= order.city %></div>
       <div><span>العنوان:</span> <%= order.address %></div>
       <% if (order.notes) { %><div><span>ملاحظات:</span> <%= order.notes %></div><% } %>
-      <div><span>التاريخ:</span> <%= new Date(order.created_at).toLocaleString('ar-EG') %></div>
+      <div><span>التاريخ:</span> <%= new Date(order.created_at).toLocaleString('ar-EG-u-nu-latn') %></div>
     </div>
     <div class="table-wrap">
       <table class="table">
@@ -21,8 +21,8 @@
             <tr>
               <td><%= it.product_name %></td>
               <td><%= it.qty %></td>
-              <td><%= it.price.toLocaleString('ar-EG') %></td>
-              <td><%= (it.price * it.qty).toLocaleString('ar-EG') %></td>
+              <td><%= it.price.toLocaleString('ar-EG-u-nu-latn') %></td>
+              <td><%= (it.price * it.qty).toLocaleString('ar-EG-u-nu-latn') %></td>
             </tr>
           <% }) %>
         </tbody>
@@ -31,12 +31,12 @@
     <% if (order.shipping > 0) { %>
     <div class="summary-row">
       <span>التوصيل</span>
-      <span><%= order.shipping.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+      <span><%= order.shipping.toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %></span>
     </div>
     <% } %>
     <div class="summary-row total">
       <span>الإجمالي</span>
-      <span><%= order.total.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+      <span><%= order.total.toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %></span>
     </div>
   </div>
 

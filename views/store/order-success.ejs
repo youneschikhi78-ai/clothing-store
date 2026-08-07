@@ -11,19 +11,19 @@
       <% items.forEach(it => { %>
         <div class="summary-row">
           <span><%= it.product_name %> × <%= it.qty %></span>
-          <span><%= (it.price * it.qty).toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+          <span><%= (it.price * it.qty).toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %></span>
         </div>
       <% }) %>
       <hr>
       <% if (order.shipping > 0) { %>
       <div class="summary-row">
         <span>التوصيل</span>
-        <span><%= order.shipping.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+        <span><%= order.shipping.toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %></span>
       </div>
       <% } %>
       <div class="summary-row total">
         <span>الإجمالي</span>
-        <span><%= order.total.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+        <span><%= order.total.toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %></span>
       </div>
     </div>
 

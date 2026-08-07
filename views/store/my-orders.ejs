@@ -26,8 +26,8 @@
           <% orders.forEach(o => { %>
             <tr>
               <td>#<%= o.id %></td>
-              <td><%= new Date(o.created_at).toLocaleString('ar-EG') %></td>
-              <td><%= o.total.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></td>
+              <td><%= new Date(o.created_at).toLocaleString('ar-EG-u-nu-latn') %></td>
+              <td><%= o.total.toLocaleString('ar-EG-u-nu-latn') %> <%= site.currency || 'ج.م' %></td>
               <td><span class="status status-<%= o.status %>"><%= statuses[o.status] || o.status %></span></td>
               <td><a href="/order/<%= o.id %>" class="btn btn-ghost btn-sm">التفاصيل</a></td>
             </tr>
