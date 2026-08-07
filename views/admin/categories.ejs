@@ -3,9 +3,12 @@
 <div class="card">
   <h3>إضافة فئة جديدة</h3>
   <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
-  <form action="/admin/categories" method="POST" class="inline-form">
+  <% if (upload === 'size') { %><div class="alert alert-danger">حجم الصورة يتجاوز 3 ميجابايت</div><% } %>
+  <% if (upload === 'format') { %><div class="alert alert-danger">صيغة الصورة غير مدعومة</div><% } %>
+  <form action="/admin/categories" method="POST" enctype="multipart/form-data" class="inline-form">
     <input type="text" name="name" placeholder="اسم الفئة" required>
     <input type="text" name="description" placeholder="وصف مختصر (اختياري)">
+    <input type="file" name="image" accept="image/*">
     <button type="submit" class="btn btn-primary">إضافة</button>
   </form>
 </div>
@@ -14,16 +17,20 @@
   <div class="table-wrap">
     <table class="table">
       <thead>
-        <tr><th>الاسم</th><th>الوصف</th><th>عدد المنتجات</th><th>إجراءات</th></tr>
+        <tr><th>الصورة</th><th>الاسم</th><th>الوصف</th><th>عدد المنتجات</th><th>إجراءات</th></tr>
       </thead>
       <tbody>
         <% categories.forEach(c => { %>
           <tr>
+            <td class="cat-thumb-cell">
+              <% if (c.image) { %><img src="<%= c.image %>" alt="<%= c.name %>" class="cat-thumb"><% } else { %>—<% } %>
+            </td>
             <td><%= c.name %></td>
             <td><%= c.description || '—' %></td>
             <td><%= c.product_count %></td>
             <td class="actions-cell">
               <a href="/products?cat=<%= c.slug %>" target="_blank" class="btn btn-ghost btn-sm">عرض</a>
+              <a href="/admin/categories/<%= c.id %>/edit" class="btn btn-ghost btn-sm">تعديل</a>
               <form action="/admin/categories/<%= c.id %>/delete" method="POST" onsubmit="return confirm('حذف الفئة؟ ستُفصل المنتجات المرتبطة بها.')">
                 <button class="btn btn-danger btn-sm">حذف</button>
               </form>

@@ -1,8 +1,19 @@
+const ARABIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
+const PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+
+function toEnglishDigits(value) {
+  let s = String(value);
+  s = s.replace(/[٠-٩]/g, (d) => String(ARABIC_DIGITS.indexOf(d)));
+  s = s.replace(/[۰-۹]/g, (d) => String(PERSIAN_DIGITS.indexOf(d)));
+  return s;
+}
+
 function clean(value, maxLength) {
   if (value === null || value === undefined) return '';
   let s = String(value);
   s = s.replace(/[\u0000-\u001F\u007F]/g, '');
   s = s.replace(/<[^>]*>/g, '');
+  s = toEnglishDigits(s);
   s = s.trim();
   if (maxLength && s.length > maxLength) s = s.slice(0, maxLength);
   return s;
@@ -60,7 +71,7 @@ function isValidEmail(email) {
 }
 
 function isValidPhone(phone) {
-  const digits = String(phone || '').replace(/[^0-9]/g, '');
+  const digits = toEnglishDigits(phone || '').replace(/[^0-9]/g, '');
   return digits.length >= 6 && digits.length <= 15;
 }
 
@@ -145,7 +156,7 @@ function csrfOriginCheck(req, res, next) {
 }
 
 function cleanNumber(value) {
-  const n = parseFloat(String(value).replace(/[^0-9.]/g, ''));
+  const n = parseFloat(toEnglishDigits(value).replace(/[^0-9.]/g, ''));
   return Number.isFinite(n) ? n : 0;
 }
 
@@ -155,6 +166,7 @@ module.exports = {
   isValidEmail,
   isValidPhone,
   cleanNumber,
+  toEnglishDigits,
   loginLimiter,
   resetLoginAttempts,
   csrfOriginCheck,

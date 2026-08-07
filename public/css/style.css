@@ -208,6 +208,20 @@ img { max-width: 100%; display: block; }
   font-weight: 800;
   margin: 0 auto 14px;
 }
+.category-image {
+  width: 100%;
+  height: 140px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 14px;
+  background: #fff;
+}
+.category-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 .category-card h3 { margin-bottom: 6px; }
 .category-card p { color: var(--text-muted); font-size: 0.85rem; }
 
@@ -511,6 +525,8 @@ hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
 }
 .actions-cell { display: flex; gap: 8px; align-items: center; }
 .actions-cell form { margin: 0; }
+.cat-thumb-cell { width: 70px; }
+.cat-thumb { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; }
 .top-product { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
 .top-product:last-child { border-bottom: none; }
 .top-rank {

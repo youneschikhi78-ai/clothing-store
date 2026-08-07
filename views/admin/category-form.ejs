@@ -1,0 +1,48 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card">
+  <h3>تعديل فئة: <%= category.name %></h3>
+  <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+  <% if (upload === 'size') { %><div class="alert alert-danger">حجم الصورة يتجاوز 3 ميجابايت</div><% } %>
+  <% if (upload === 'format') { %><div class="alert alert-danger">صيغة الصورة غير مدعومة</div><% } %>
+  <form action="/admin/categories/<%= category.id %>/edit" method="POST" enctype="multipart/form-data">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>اسم الفئة *</label>
+        <input type="text" name="name" value="<%= category.name %>" required>
+      </div>
+      <div class="form-group">
+        <label>صورة الفئة (اختياري)</label>
+        <input type="file" name="image" accept="image/*">
+        <small>إن لم تختر صورة تبقى الصورة الحالية، أو امسحها من الخيار بالأسفل.</small>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>وصف مختصر</label>
+      <textarea name="description" rows="3"><%= category.description || '' %></textarea>
+    </div>
+
+    <div class="checkbox-row">
+      <label class="checkbox">
+        <input type="checkbox" name="remove_image" <%= !category.image ? 'disabled' : '' %>> إزالة الصورة (لا تظهر أي صورة لهذه الفئة)
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label>الصورة الحالية</label>
+      <% if (category.image) { %>
+        <div class="thumb" style="margin-top:8px"><img src="<%= category.image %>" alt=""></div>
+      <% } else { %>
+        <p style="margin-top:8px">لا توجد صورة — لن تظهر أي صورة لهذه الفئة في المتجر.</p>
+      <% } %>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">حفظ</button>
+      <a href="/admin/categories" class="btn btn-ghost">إلغاء</a>
+    </div>
+  </form>
+</div>
+
+<%- include('../partials/admin-footer') %>

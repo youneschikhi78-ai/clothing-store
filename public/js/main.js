@@ -1,10 +1,16 @@
 function changeQty(delta) {
   const input = document.getElementById('qty');
   if (!input) return;
-  const val = parseInt(input.value, 10) || 1;
+  const val = parseInt(toEnDigits(input.value), 10) || 1;
   const max = parseInt(input.max, 10) || 999;
   const next = Math.max(1, Math.min(max, val + delta));
   input.value = next;
+}
+
+function toEnDigits(s) {
+  return String(s)
+    .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+    .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
 }
 
 document.addEventListener('click', (e) => {

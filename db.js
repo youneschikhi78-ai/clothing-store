@@ -102,6 +102,12 @@ if (!userCols.some(c => c.name === 'banned')) {
   console.log('✓ تمت ترقية قاعدة البيانات (عمود banned)');
 }
 
+const catCols = db.prepare('PRAGMA table_info(categories)').all();
+if (!catCols.some(c => c.name === 'image')) {
+  db.exec("ALTER TABLE categories ADD COLUMN image TEXT DEFAULT ''");
+  console.log('✓ تمت ترقية قاعدة البيانات (عمود image للفئات)');
+}
+
 const SCRYPT = { N: 1 << 17, r: 8, p: 1, maxmem: 256 * 1024 * 1024 };
 const SCRYPT_LEGACY = { N: 1 << 14, r: 8, p: 1, maxmem: 64 * 1024 * 1024 };
 

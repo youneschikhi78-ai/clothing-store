@@ -152,17 +152,43 @@ router.get('/categories', (req, res) => {
   const categories = db.prepare(
     'SELECT c.*, (SELECT COUNT(*) FROM products p WHERE p.category_id = c.id) AS product_count FROM categories c ORDER BY id'
   ).all();
-  res.render('admin/categories', { title: 'الفئات', layout: 'admin', categories, error: null });
+  res.render('admin/categories', { title: 'الفئات', layout: 'admin', categories, error: null, upload: req.query.upload });
 });
 
-router.post('/categories', (req, res) => {
+router.post('/categories', upload.single('image'), handleUploadError, (req, res) => {
   const { name, description } = req.body;
   if (!name) {
     const categories = db.prepare('SELECT c.*, (SELECT COUNT(*) FROM products p WHERE p.category_id = c.id) AS product_count FROM categories c ORDER BY id').all();
     return res.render('admin/categories', { title: 'الفئات', layout: 'admin', categories, error: 'اسم الفئة مطلوب' });
   }
-  db.prepare('INSERT INTO categories (name, slug, description) VALUES (?, ?, ?)')
-    .run(name, slugify(name), description || '');
+  const image = req.file ? '/uploads/' + req.file.filename : '';
+  db.prepare('INSERT INTO categories (name, slug, description, image) VALUES (?, ?, ?, ?)')
+    .run(name, slugify(name), description || '', image);
+  res.redirect('/admin/categories');
+});
+
+router.get('/categories/:id/edit', (req, res) => {
+  const category = db.prepare('SELECT * FROM categories WHERE id = ?').get(req.params.id);
+  if (!category) return res.redirect('/admin/categories');
+  res.render('admin/category-form', { title: 'تعديل فئة', layout: 'admin', category, error: null, upload: req.query.upload });
+});
+
+router.post('/categories/:id/edit', upload.single('image'), handleUploadError, (req, res) => {
+  const id = req.params.id;
+  const existing = db.prepare('SELECT * FROM categories WHERE id = ?').get(id);
+  if (!existing) return res.redirect('/admin/categories');
+
+  const { name, description, remove_image } = req.body;
+  if (!name) {
+    return res.render('admin/category-form', { title: 'تعديل فئة', layout: 'admin', category: existing, error: 'اسم الفئة مطلوب' });
+  }
+
+  let image = existing.image || '';
+  if (remove_image) image = '';
+  if (req.file) image = '/uploads/' + req.file.filename;
+
+  db.prepare('UPDATE categories SET name=?, slug=?, description=?, image=? WHERE id=?')
+    .run(name, slugify(name), description || '', image, id);
   res.redirect('/admin/categories');
 });
 

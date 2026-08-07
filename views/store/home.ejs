@@ -30,9 +30,9 @@
     <div class="category-grid">
       <% cats.forEach(c => { %>
         <a href="/products?cat=<%= c.slug %>" class="category-card">
-          <div class="category-circle"><span><%= c.name.charAt(0) %></span></div>
+          <% if (c.image) { %><div class="category-image"><img src="<%= c.image %>" alt="<%= c.name %>"></div><% } %>
           <h3><%= c.name %></h3>
-          <p><%= c.description %></p>
+          <% if (c.description) { %><p><%= c.description %></p><% } %>
         </a>
       <% }) %>
     </div>
