@@ -116,14 +116,29 @@ function csrfOriginCheck(req, res, next) {
     return next();
   }
   const origin = req.headers.origin;
-  if (origin) {
-    try {
-      const originHost = new URL(origin).host;
-      if (originHost !== (req.headers.host || '')) {
-        return res.status(403).send('طلب مرفوض: مصدر غير مصرح به');
-      }
-    } catch (e) {
-      return res.status(403).send('طلب مرفوض');
+  if (!origin || origin === 'null') return next();
+
+  let o;
+  try { o = new URL(origin); } catch (e) { return res.status(403).send('طلب مرفوض'); }
+
+  const originHost = o.hostname.toLowerCase().replace(/\.$/, '');
+  const reqHostname = (req.hostname || '').toLowerCase().replace(/\.$/, '');
+  if (originHost !== reqHostname) {
+    return res.status(403).send('طلب مرفوض: مصدر غير مصرح به');
+  }
+
+  if (o.port) {
+    const hostHeader = String(req.headers.host || '');
+    let hostPort = '';
+    if (hostHeader.includes('[')) {
+      const m = hostHeader.match(/]:(\d+)/);
+      hostPort = m ? m[1] : '';
+    } else {
+      const idx = hostHeader.lastIndexOf(':');
+      hostPort = idx === -1 ? '' : hostHeader.slice(idx + 1);
+    }
+    if (hostPort && o.port !== hostPort) {
+      return res.status(403).send('طلب مرفوض: مصدر غير مصرح به');
     }
   }
   next();
