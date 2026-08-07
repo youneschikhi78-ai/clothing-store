@@ -9,5 +9,18 @@ function changeQty(delta) {
 
 document.addEventListener('click', (e) => {
   const drop = document.getElementById('userDrop');
+
+  const toggle = e.target.closest('[data-toggle-dropdown]');
+  if (toggle && drop) {
+    drop.classList.toggle('open');
+    return;
+  }
+
+  const qtyBtn = e.target.closest('[data-qty]');
+  if (qtyBtn) {
+    changeQty(parseInt(qtyBtn.getAttribute('data-qty'), 10));
+    return;
+  }
+
   if (drop && !e.target.closest('.user-menu')) drop.classList.remove('open');
 });

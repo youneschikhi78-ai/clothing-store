@@ -32,9 +32,9 @@
     <form action="/cart/add" method="POST" class="add-to-cart-form">
       <input type="hidden" name="id" value="<%= product.id %>">
       <div class="qty-control">
-        <button type="button" onclick="changeQty(-1)">-</button>
+        <button type="button" data-qty="-1">-</button>
         <input type="number" name="qty" id="qty" value="1" min="1" max="<%= Math.max(product.stock, 1) %>">
-        <button type="button" onclick="changeQty(1)">+</button>
+        <button type="button" data-qty="1">+</button>
       </div>
       <button type="submit" class="btn btn-primary btn-lg" <%= product.stock === 0 ? 'disabled' : '' %>>
         🛒 أضف إلى السلة

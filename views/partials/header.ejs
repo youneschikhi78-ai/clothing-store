@@ -26,7 +26,7 @@
         </a>
         <% if (user) { %>
           <div class="user-menu">
-            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('userDrop').classList.toggle('open')">
+            <button type="button" class="btn btn-ghost btn-sm" data-toggle-dropdown>
               👤 <%= user.name %>
             </button>
             <div class="dropdown" id="userDrop">
