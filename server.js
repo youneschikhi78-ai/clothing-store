@@ -1,15 +1,20 @@
-const express = require('express');
+﻿const express = require('express');
 const session = require('express-session');
 const helmet = require('helmet');
 const path = require('path');
-const { seed } = require('./db');
-const { verifyPassword, db } = require('./db');
+require('dotenv').config({ quiet: true });
+const db = require('./db');
+const { verifyPassword } = require('./db');
 const { sanitizeBody, isValidEmail, loginLimiter, resetLoginAttempts, csrfOriginCheck } = require('./middleware/security');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-seed();
+const ready = db.initSchema().then(() => db.seed());
+
+app.use(async (req, res, next) => {
+  try { await ready; next(); } catch (e) { next(e); }
+});
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -23,7 +28,7 @@ app.use(helmet({
       'default-src': ["'self'"],
       'style-src': ["'self'", "'unsafe-inline'"],
       'script-src': ["'self'", "'unsafe-inline'"],
-      'img-src': ["'self'", 'data:', 'blob:'],
+      'img-src': ["'self'", 'data:', 'blob:', 'https:'],
       'font-src': ["'self'", 'data:'],
       'connect-src': ["'self'"],
       'frame-ancestors': ["'self'"],
@@ -71,7 +76,7 @@ app.get('/admin/login', (req, res) => {
   res.render('admin/login', { title: 'دخول المدير', layout: 'admin', error: null });
 });
 
-app.post('/admin/login', loginLimiter, (req, res) => {
+app.post('/admin/login', loginLimiter, async (req, res, next) => {
   if (req.rateLock) {
     return res.render('admin/login', {
       title: 'دخول المدير',
@@ -81,7 +86,10 @@ app.post('/admin/login', loginLimiter, (req, res) => {
   }
 
   const { email, password } = req.body;
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  let user;
+  try {
+    user = await db.get('SELECT * FROM users WHERE email = ?', [email]);
+  } catch (e) { return next(e); }
   const error = !user || user.role !== 'admin' || !verifyPassword(password, user.password_hash)
     ? 'بيانات الدخول غير صحيحة أو لا تملك صلاحية المدير'
     : null;
@@ -109,11 +117,17 @@ app.use((err, req, res, next) => {
 });
 
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log('\n✓ المتجر يعمل الآن');
-    console.log('  المتجر:   http://localhost:' + PORT);
-    console.log('  لوحة التحكم: http://localhost:' + PORT + '/admin/login');
-    console.log('  بيانات المدير: admin@store.com / admin123\n');
+  ready.then(() => {
+    app.listen(PORT, () => {
+      console.log('\nالمتجر يعمل الآن');
+      console.log('  المتجر:   http://localhost:' + PORT);
+      console.log('  لوحة التحكم: http://localhost:' + PORT + '/admin/login');
+      console.log('  بيانات المدير: admin@store.com / admin123');
+      console.log('  قاعدة البيانات: ' + (db.USE_PG ? 'PostgreSQL (Supabase)' : 'SQLite محلي') + '\n');
+    });
+  }).catch((e) => {
+    console.error('فشل تهيئة قاعدة البيانات:', e.message);
+    process.exit(1);
   });
 }
 

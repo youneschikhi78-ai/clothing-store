@@ -1,11 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { db, slugify } = require('../db');
+const db = require('../db');
+const { slugify } = db;
 const { isLoggedIn } = require('../middleware/auth');
 const { isValidEmail, isValidPhone, cleanNumber } = require('../middleware/security');
 
-function settings() {
-  const rows = db.prepare('SELECT key, value FROM settings').all();
+const ah = (fn) => (req, res, next) => fn(req, res, next).catch(next);
+
+async function settings() {
+  const rows = await db.all('SELECT key, value FROM settings');
   return rows.reduce((acc, r) => { acc[r.key] = r.value; return acc; }, {});
 }
 
@@ -16,32 +19,32 @@ function cartInfo(req) {
   return { items, count, total };
 }
 
-router.use((req, res, next) => {
+router.use(ah(async (req, res, next) => {
   if (req.session.user) {
-    const u = db.prepare('SELECT banned FROM users WHERE id = ?').get(req.session.user.id);
+    const u = await db.get('SELECT banned FROM users WHERE id = ?', [req.session.user.id]);
     if (u && u.banned) {
       return req.session.destroy(() => res.redirect('/login?banned=1'));
     }
   }
-  const s = settings();
-  const cats = db.prepare('SELECT * FROM categories ORDER BY id').all();
+  const s = await settings();
+  const cats = await db.all('SELECT * FROM categories ORDER BY id');
   const c = cartInfo(req);
   res.locals.site = s;
   res.locals.cats = cats;
   res.locals.cartCount = c.count;
   res.locals.user = req.session.user || null;
   next();
-});
+}));
 
-router.get('/', (req, res) => {
-  const banners = db.prepare('SELECT * FROM banners WHERE active = 1 ORDER BY sort_order, id').all();
-  const featured = db.prepare(
+router.get('/', ah(async (req, res) => {
+  const banners = await db.all('SELECT * FROM banners WHERE active = 1 ORDER BY sort_order, id');
+  const featured = await db.all(
     'SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON c.id = p.category_id WHERE p.active = 1 AND p.featured = 1 ORDER BY p.created_at DESC LIMIT 8'
-  ).all();
-  const newest = db.prepare(
+  );
+  const newest = await db.all(
     'SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON c.id = p.category_id WHERE p.active = 1 ORDER BY p.created_at DESC LIMIT 8'
-  ).all();
-  const cats = db.prepare('SELECT * FROM categories ORDER BY id').all();
+  );
+  const cats = await db.all('SELECT * FROM categories ORDER BY id');
 
   res.render('store/home', {
     title: res.locals.site.site_name,
@@ -51,9 +54,9 @@ router.get('/', (req, res) => {
     newest,
     cats,
   });
-});
+}));
 
-router.get('/products', (req, res) => {
+router.get('/products', ah(async (req, res) => {
   const { cat, q } = req.query;
   let sql = 'SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON c.id = p.category_id WHERE p.active = 1';
   const params = [];
@@ -68,8 +71,8 @@ router.get('/products', (req, res) => {
   }
   sql += ' ORDER BY p.created_at DESC';
 
-  const products = db.prepare(sql).all(...params);
-  const currentCat = cat ? db.prepare('SELECT * FROM categories WHERE slug = ? OR id = ?').get(cat, cat) : null;
+  const products = await db.all(sql, params);
+  const currentCat = cat ? await db.get('SELECT * FROM categories WHERE slug = ? OR id = ?', [cat, cat]) : null;
 
   res.render('store/products', {
     title: currentCat ? currentCat.name : (q ? 'نتائج البحث' : 'جميع المنتجات'),
@@ -78,27 +81,29 @@ router.get('/products', (req, res) => {
     currentCat,
     q: q || '',
   });
-});
+}));
 
-router.get('/product/:id', (req, res) => {
+router.get('/product/:id', ah(async (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const product = db.prepare(
-    'SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON c.id = p.category_id WHERE p.id = ? AND p.active = 1'
-  ).get(id);
+  const product = await db.get(
+    'SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON c.id = p.category_id WHERE p.id = ? AND p.active = 1',
+    [id]
+  );
 
   if (!product) return res.status(404).render('store/404', { title: 'غير موجود', layout: 'store' });
 
-  const related = db.prepare(
-    'SELECT * FROM products WHERE category_id = ? AND id != ? AND active = 1 LIMIT 4'
-  ).all(product.category_id, product.id);
+  const related = await db.all(
+    'SELECT * FROM products WHERE category_id = ? AND id != ? AND active = 1 LIMIT 4',
+    [product.category_id, product.id]
+  );
 
   res.render('store/product', { title: product.name, layout: 'store', product, related });
-});
+}));
 
-router.post('/cart/add', (req, res) => {
+router.post('/cart/add', ah(async (req, res) => {
   const id = parseInt(req.body.id, 10);
   const qty = Math.max(1, parseInt(req.body.qty, 10) || 1);
-  const product = db.prepare('SELECT id, name, price, image, stock FROM products WHERE id = ? AND active = 1').get(id);
+  const product = await db.get('SELECT id, name, price, image, stock FROM products WHERE id = ? AND active = 1', [id]);
   if (!product) return res.redirect('/products');
 
   if (!req.session.cart) req.session.cart = [];
@@ -108,7 +113,7 @@ router.post('/cart/add', (req, res) => {
   else items.push({ id: product.id, name: product.name, price: product.price, image: product.image, qty: Math.min(product.stock || 999, qty) });
 
   res.redirect(req.get('Referer') || '/cart');
-});
+}));
 
 router.post('/cart/update', (req, res) => {
   const id = parseInt(req.body.id, 10);
@@ -131,7 +136,7 @@ router.get('/cart', (req, res) => {
   res.render('store/cart', { title: 'سلة التسوق', layout: 'store', cart: c });
 });
 
-router.get('/checkout', isLoggedIn, (req, res) => {
+router.get('/checkout', isLoggedIn, ah(async (req, res) => {
   const c = cartInfo(req);
   if (c.items.length === 0) return res.redirect('/cart');
   const shipping = parseFloat(res.locals.site.shipping_fee) || 0;
@@ -144,9 +149,9 @@ router.get('/checkout', isLoggedIn, (req, res) => {
     shippingCost,
     error: null,
   });
-});
+}));
 
-router.post('/checkout', isLoggedIn, (req, res) => {
+router.post('/checkout', isLoggedIn, ah(async (req, res) => {
   const c = cartInfo(req);
   if (c.items.length === 0) return res.redirect('/cart');
 
@@ -173,55 +178,55 @@ router.post('/checkout', isLoggedIn, (req, res) => {
     });
   }
 
-  const info = db.prepare(
-    'INSERT INTO orders (user_id, name, phone, city, address, notes, total) VALUES (?, ?, ?, ?, ?, ?, ?)'
-  ).run(req.session.user.id, name, phone, city, address, notes || '', total);
+  const info = await db.run(
+    'INSERT INTO orders (user_id, name, phone, city, address, notes, total) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [req.session.user.id, name, phone, city, address, notes || '', total]
+  );
 
   const orderId = info.lastInsertRowid;
-  const insItem = db.prepare('INSERT INTO order_items (order_id, product_id, product_name, price, qty) VALUES (?, ?, ?, ?, ?)');
-  const decStock = db.prepare('UPDATE products SET stock = stock - ? WHERE id = ?');
   for (const it of c.items) {
-    insItem.run(orderId, it.id, it.name, it.price, it.qty);
-    decStock.run(it.qty, it.id);
+    await db.run('INSERT INTO order_items (order_id, product_id, product_name, price, qty) VALUES (?, ?, ?, ?, ?)',
+      [orderId, it.id, it.name, it.price, it.qty]);
+    await db.run('UPDATE products SET stock = stock - ? WHERE id = ?', [it.qty, it.id]);
   }
 
   req.session.cart = [];
   res.redirect('/order/' + orderId + '/success');
-});
+}));
 
-router.get('/order/:id/success', isLoggedIn, (req, res) => {
-  const order = db.prepare('SELECT * FROM orders WHERE id = ? AND user_id = ?').get(req.params.id, req.session.user.id);
+router.get('/order/:id/success', isLoggedIn, ah(async (req, res) => {
+  const order = await db.get('SELECT * FROM orders WHERE id = ? AND user_id = ?', [req.params.id, req.session.user.id]);
   if (!order) return res.redirect('/');
-  const items = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(order.id);
+  const items = await db.all('SELECT * FROM order_items WHERE order_id = ?', [order.id]);
   res.render('store/order-success', { title: 'تم الطلب بنجاح', layout: 'store', order, items });
-});
+}));
 
-router.get('/orders', isLoggedIn, (req, res) => {
-  const orders = db.prepare('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC').all(req.session.user.id);
+router.get('/orders', isLoggedIn, ah(async (req, res) => {
+  const orders = await db.all('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC', [req.session.user.id]);
   const statuses = {
     new: 'جديد', processing: 'قيد التجهيز', shipped: 'تم الشحن', delivered: 'تم التسليم', cancelled: 'ملغي',
   };
   res.render('store/my-orders', { title: 'طلباتي', layout: 'store', orders, statuses });
-});
+}));
 
-router.get('/order/:id', isLoggedIn, (req, res) => {
-  const order = db.prepare('SELECT * FROM orders WHERE id = ? AND user_id = ?').get(req.params.id, req.session.user.id);
+router.get('/order/:id', isLoggedIn, ah(async (req, res) => {
+  const order = await db.get('SELECT * FROM orders WHERE id = ? AND user_id = ?', [req.params.id, req.session.user.id]);
   if (!order) return res.redirect('/orders');
-  const items = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(order.id);
+  const items = await db.all('SELECT * FROM order_items WHERE order_id = ?', [order.id]);
   res.render('store/order-detail', { title: 'تفاصيل الطلب', layout: 'store', order, items });
-});
+}));
 
-router.get('/page/:slug', (req, res) => {
-  const page = db.prepare('SELECT * FROM pages WHERE slug = ? AND published = 1').get(req.params.slug);
+router.get('/page/:slug', ah(async (req, res) => {
+  const page = await db.get('SELECT * FROM pages WHERE slug = ? AND published = 1', [req.params.slug]);
   if (!page) return res.status(404).render('store/404', { title: 'غير موجود', layout: 'store' });
   res.render('store/page', { title: page.title, layout: 'store', page });
-});
+}));
 
 router.get('/contact', (req, res) => {
   res.render('store/contact', { title: 'اتصل بنا', layout: 'store', success: null, error: null });
 });
 
-router.post('/contact', (req, res) => {
+router.post('/contact', ah(async (req, res) => {
   const { name, email, subject, message } = req.body;
   let error = null;
   if (!name || !email || !message) error = 'يرجى ملء جميع الحقول المطلوبة';
@@ -232,9 +237,9 @@ router.post('/contact', (req, res) => {
   if (error) {
     return res.render('store/contact', { title: 'اتصل بنا', layout: 'store', success: null, error });
   }
-  db.prepare('INSERT INTO messages (name, email, subject, message) VALUES (?, ?, ?, ?)')
-    .run(name, email, subject || '', message);
+  await db.run('INSERT INTO messages (name, email, subject, message) VALUES (?, ?, ?, ?)',
+    [name, email, subject || '', message]);
   res.render('store/contact', { title: 'اتصل بنا', layout: 'store', success: 'تم إرسال رسالتك بنجاح، سنتواصل معك قريباً.', error: null });
-});
+}));
 
 module.exports = router;

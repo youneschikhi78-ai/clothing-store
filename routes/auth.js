@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { db, hashPassword, verifyPassword } = require('../db');
+const db = require('../db');
+const { hashPassword, verifyPassword } = db;
 const { isGuest } = require('../middleware/auth');
 const { isValidEmail, loginLimiter, resetLoginAttempts } = require('../middleware/security');
+
+const ah = (fn) => (req, res, next) => fn(req, res, next).catch(next);
 
 router.get('/login', isGuest, (req, res) => {
   res.render('store/login', {
@@ -14,7 +17,7 @@ router.get('/login', isGuest, (req, res) => {
   });
 });
 
-router.post('/login', loginLimiter, (req, res) => {
+router.post('/login', loginLimiter, ah(async (req, res) => {
   if (req.rateLock) {
     return res.render('store/login', {
       title: 'تسجيل الدخول',
@@ -26,7 +29,7 @@ router.post('/login', loginLimiter, (req, res) => {
   }
 
   const { email, password, next } = req.body;
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  const user = await db.get('SELECT * FROM users WHERE email = ?', [email]);
 
   let error = null;
   if (!user) error = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
@@ -46,7 +49,7 @@ router.post('/login', loginLimiter, (req, res) => {
   resetLoginAttempts(res);
   req.session.user = { id: user.id, name: user.name, email: user.email, role: user.role };
   res.redirect(user.role === 'admin' ? '/admin' : (next && next !== '/admin/login' ? next : '/'));
-});
+}));
 
 router.get('/register', isGuest, (req, res) => {
   res.render('store/register', {
@@ -57,9 +60,11 @@ router.get('/register', isGuest, (req, res) => {
   });
 });
 
-router.post('/register', (req, res) => {
+router.post('/register', ah(async (req, res) => {
   const { name, email, password, confirm } = req.body;
   let error = null;
+
+  const existing = await db.get('SELECT id FROM users WHERE email = ?', [email]);
 
   if (!name || !email || !password) error = 'يرجى ملء جميع الحقول';
   else if (name.length < 2) error = 'الاسم قصير جداً';
@@ -67,7 +72,7 @@ router.post('/register', (req, res) => {
   else if (password.length < 6) error = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
   else if (password.length > 128) error = 'كلمة المرور طويلة جداً';
   else if (password !== confirm) error = 'كلمتا المرور غير متطابقتين';
-  else if (db.prepare('SELECT id FROM users WHERE email = ?').get(email)) error = 'هذا البريد مسجل مسبقاً';
+  else if (existing) error = 'هذا البريد مسجل مسبقاً';
 
   if (error) {
     return res.render('store/register', {
@@ -78,12 +83,12 @@ router.post('/register', (req, res) => {
     });
   }
 
-  const info = db.prepare('INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)')
-    .run(name, email, hashPassword(password), 'customer');
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
+  const info = await db.run('INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)',
+    [name, email, hashPassword(password), 'customer']);
+  const user = await db.get('SELECT * FROM users WHERE id = ?', [info.lastInsertRowid]);
   req.session.user = { id: user.id, name: user.name, email: user.email, role: user.role };
   res.redirect('/');
-});
+}));
 
 router.get('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/'));

@@ -1,6 +1,6 @@
 const http = require('http');
 const app = require('../server');
-const { db } = require('../db');
+const db = require('../db');
 
 let failures = 0;
 function check(name, cond) {
@@ -86,7 +86,7 @@ function req(path, opts = {}) {
       const home2 = await req('/');
       check('category with image shows img', home2.text.includes('alt="رجالي"') && home2.text.includes('/uploads/'));
 
-      db.prepare('UPDATE categories SET image = ? WHERE id = 1').run('');
+      await db.run('UPDATE categories SET image = ? WHERE id = 1', ['']);
       console.log(failures ? '\n' + failures + ' FAILURES' : '\nALL TESTS PASSED');
       server.close(() => process.exit(failures ? 1 : 0));
     } catch (e) { console.error(e); process.exit(1); }
