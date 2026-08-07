@@ -139,14 +139,22 @@ router.get('/cart', (req, res) => {
 router.get('/checkout', isLoggedIn, ah(async (req, res) => {
   const c = cartInfo(req);
   if (c.items.length === 0) return res.redirect('/cart');
-  const shipping = parseFloat(res.locals.site.shipping_fee) || 0;
-  const freeOver = parseFloat(res.locals.site.free_shipping_over) || 0;
-  const shippingCost = (c.total >= freeOver && freeOver > 0) ? 0 : shipping;
+  const zones = await db.all('SELECT * FROM delivery_zones WHERE active = 1 ORDER BY sort_order, id');
+  let shippingCost = null;
+  let freeOver = 0;
+  if (zones.length === 0) {
+    const shipping = parseFloat(res.locals.site.shipping_fee) || 0;
+    freeOver = parseFloat(res.locals.site.free_shipping_over) || 0;
+    shippingCost = (c.total >= freeOver && freeOver > 0) ? 0 : shipping;
+  }
   res.render('store/checkout', {
     title: 'إتمام الطلب',
     layout: 'store',
     cart: c,
+    zones,
     shippingCost,
+    freeOver,
+    selectedCity: '',
     error: null,
   });
 }));
@@ -163,9 +171,19 @@ router.post('/checkout', isLoggedIn, ah(async (req, res) => {
   else if (city.length < 2 || city.length > 60) error = 'المدينة غير صالحة';
   else if (address.length < 5 || address.length > 300) error = 'العنوان غير صالح';
 
-  const shipping = parseFloat(res.locals.site.shipping_fee) || 0;
-  const freeOver = parseFloat(res.locals.site.free_shipping_over) || 0;
-  const shippingCost = (c.total >= freeOver && freeOver > 0) ? 0 : shipping;
+  const zones = await db.all('SELECT * FROM delivery_zones WHERE active = 1 ORDER BY sort_order, id');
+  const zoneMode = zones.length > 0;
+  let shippingCost = 0;
+  let zoneMatched = false;
+  if (zoneMode) {
+    const zone = zones.find(z => z.name === city);
+    if (!zone) error = 'يرجى اختيار الولاية من القائمة';
+    else { zoneMatched = true; shippingCost = zone.price; }
+  } else {
+    const shipping = parseFloat(res.locals.site.shipping_fee) || 0;
+    const freeOver = parseFloat(res.locals.site.free_shipping_over) || 0;
+    shippingCost = (c.total >= freeOver && freeOver > 0) ? 0 : shipping;
+  }
   const total = c.total + shippingCost;
 
   if (error) {
@@ -173,14 +191,17 @@ router.post('/checkout', isLoggedIn, ah(async (req, res) => {
       title: 'إتمام الطلب',
       layout: 'store',
       cart: c,
-      shippingCost,
+      zones,
+      shippingCost: zoneMode ? (zoneMatched ? shippingCost : null) : shippingCost,
+      freeOver: zoneMode ? 0 : (parseFloat(res.locals.site.free_shipping_over) || 0),
+      selectedCity: city || '',
       error,
     });
   }
 
   const info = await db.run(
-    'INSERT INTO orders (user_id, name, phone, city, address, notes, total) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [req.session.user.id, name, phone, city, address, notes || '', total]
+    'INSERT INTO orders (user_id, name, phone, city, address, notes, total, shipping) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [req.session.user.id, name, phone, city, address, notes || '', total, shippingCost]
   );
 
   const orderId = info.lastInsertRowid;

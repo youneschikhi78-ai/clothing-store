@@ -324,6 +324,44 @@ router.post('/banners/:id/toggle', ah(async (req, res) => {
   res.redirect('/admin/banners');
 }));
 
+/* ---------- مناطق التوصيل ---------- */
+router.get('/zones', ah(async (req, res) => {
+  const zones = await db.all('SELECT * FROM delivery_zones ORDER BY sort_order, id');
+  res.render('admin/zones', { title: 'مناطق التوصيل', layout: 'admin', zones, error: null });
+}));
+
+router.post('/zones', ah(async (req, res) => {
+  const { name, price, sort_order } = req.body;
+  if (!name) {
+    const zones = await db.all('SELECT * FROM delivery_zones ORDER BY sort_order, id');
+    return res.render('admin/zones', { title: 'مناطق التوصيل', layout: 'admin', zones, error: 'اسم الولاية مطلوب' });
+  }
+  await db.run('INSERT INTO delivery_zones (name, price, sort_order) VALUES (?, ?, ?)',
+    [String(name).trim(), cleanNumber(price), cleanNumber(sort_order)]);
+  res.redirect('/admin/zones');
+}));
+
+router.post('/zones/:id/edit', ah(async (req, res) => {
+  const { name, price, active, sort_order } = req.body;
+  if (!name) {
+    const zones = await db.all('SELECT * FROM delivery_zones ORDER BY sort_order, id');
+    return res.render('admin/zones', { title: 'مناطق التوصيل', layout: 'admin', zones, error: 'اسم الولاية مطلوب' });
+  }
+  await db.run('UPDATE delivery_zones SET name=?, price=?, active=?, sort_order=? WHERE id=?',
+    [String(name).trim(), cleanNumber(price), active ? 1 : 0, cleanNumber(sort_order), req.params.id]);
+  res.redirect('/admin/zones');
+}));
+
+router.post('/zones/:id/toggle', ah(async (req, res) => {
+  await db.run('UPDATE delivery_zones SET active = CASE active WHEN 1 THEN 0 ELSE 1 END WHERE id = ?', [req.params.id]);
+  res.redirect('/admin/zones');
+}));
+
+router.post('/zones/:id/delete', ah(async (req, res) => {
+  await db.run('DELETE FROM delivery_zones WHERE id = ?', [req.params.id]);
+  res.redirect('/admin/zones');
+}));
+
 /* ---------- الصفحات ---------- */
 router.get('/pages', ah(async (req, res) => {
   const pages = await db.all('SELECT * FROM pages ORDER BY id');

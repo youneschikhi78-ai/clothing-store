@@ -96,8 +96,16 @@ CREATE TABLE IF NOT EXISTS orders (
   address TEXT NOT NULL,
   notes TEXT DEFAULT '',
   total DOUBLE PRECISION NOT NULL,
+  shipping DOUBLE PRECISION NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'new',
   created_at TEXT NOT NULL DEFAULT to_char(now(), 'YYYY-MM-DD HH24:MI:SS')
+);
+CREATE TABLE IF NOT EXISTS delivery_zones (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  price DOUBLE PRECISION NOT NULL DEFAULT 0,
+  active INTEGER NOT NULL DEFAULT 1,
+  sort_order INTEGER NOT NULL DEFAULT 0
 );
 CREATE TABLE IF NOT EXISTS order_items (
   id SERIAL PRIMARY KEY,
@@ -178,8 +186,16 @@ CREATE TABLE IF NOT EXISTS orders (
   address TEXT NOT NULL,
   notes TEXT DEFAULT '',
   total REAL NOT NULL,
+  shipping REAL NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'new',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS delivery_zones (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  price REAL NOT NULL DEFAULT 0,
+  active INTEGER NOT NULL DEFAULT 1,
+  sort_order INTEGER NOT NULL DEFAULT 0
 );
 CREATE TABLE IF NOT EXISTS order_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -223,6 +239,7 @@ CREATE TABLE IF NOT EXISTS messages (
 async function initSchema() {
   if (pool) {
     await pool.query(PG_SCHEMA);
+    await pool.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping DOUBLE PRECISION NOT NULL DEFAULT 0');
   } else {
     sqlite.exec(SQLITE_SCHEMA);
     const userCols = sqlite.prepare('PRAGMA table_info(users)').all();
@@ -234,6 +251,11 @@ async function initSchema() {
     if (!catCols.some(c => c.name === 'image')) {
       sqlite.exec("ALTER TABLE categories ADD COLUMN image TEXT DEFAULT ''");
       console.log('تمت ترقية قاعدة البيانات (عمود image للفئات)');
+    }
+    const orderCols = sqlite.prepare('PRAGMA table_info(orders)').all();
+    if (!orderCols.some(c => c.name === 'shipping')) {
+      sqlite.exec('ALTER TABLE orders ADD COLUMN shipping REAL NOT NULL DEFAULT 0');
+      console.log('تمت ترقية قاعدة البيانات (عمود shipping)');
     }
   }
 }

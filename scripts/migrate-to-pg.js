@@ -14,7 +14,7 @@ const { DatabaseSync } = require('node:sqlite');
 const path = require('path');
 const { Pool } = require('pg');
 
-const TABLES = ['users', 'categories', 'products', 'orders', 'order_items', 'settings', 'banners', 'pages', 'messages'];
+const TABLES = ['users', 'categories', 'products', 'orders', 'order_items', 'settings', 'banners', 'pages', 'messages', 'delivery_zones'];
 
 (async () => {
   const db = require('../db.js');

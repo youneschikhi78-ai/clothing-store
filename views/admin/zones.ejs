@@ -1,0 +1,62 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card">
+  <h3>إضافة ولاية جديدة</h3>
+  <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+  <form action="/admin/zones" method="POST" class="banner-form">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>اسم الولاية *</label>
+        <input type="text" name="name" required placeholder="مثال: الجزائر">
+      </div>
+      <div class="form-group">
+        <label>سعر التوصيل</label>
+        <input type="number" name="price" value="0" min="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>الترتيب</label>
+        <input type="number" name="sort_order" value="0">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">إضافة الولاية</button>
+  </form>
+  <p class="muted">سيظهر للمتسوق عند إتمام الطلب قائمة بهذه الولايات فقط، ويُحتسب سعر التوصيل حسب الولاية المختارة.</p>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th>الولاية</th><th>سعر التوصيل</th><th>الترتيب</th><th>الحالة</th><th>إجراءات</th></tr>
+      </thead>
+      <tbody>
+        <% zones.forEach(z => { %>
+          <form id="zone-form-<%= z.id %>" action="/admin/zones/<%= z.id %>/edit" method="POST"></form>
+          <tr>
+            <td><input form="zone-form-<%= z.id %>" type="text" name="name" value="<%= z.name %>" class="form-control" style="min-width:140px" required></td>
+            <td><input form="zone-form-<%= z.id %>" type="number" name="price" value="<%= z.price %>" min="0" step="0.01" class="form-control" style="width:110px"></td>
+            <td><input form="zone-form-<%= z.id %>" type="number" name="sort_order" value="<%= z.sort_order %>" class="form-control" style="width:80px"></td>
+            <td>
+              <label class="zone-active-label">
+                <input form="zone-form-<%= z.id %>" type="checkbox" name="active" value="1" <%= z.active ? 'checked' : '' %>>
+                مفعلة
+              </label>
+            </td>
+            <td class="actions-cell">
+              <button form="zone-form-<%= z.id %>" type="submit" class="btn btn-ghost btn-sm">حفظ</button>
+              <form action="/admin/zones/<%= z.id %>/toggle" method="POST" style="display:inline">
+                <button type="submit" class="btn btn-ghost btn-sm"><%= z.active ? 'إيقاف' : 'تفعيل' %></button>
+              </form>
+              <form action="/admin/zones/<%= z.id %>/delete" method="POST" style="display:inline" onsubmit="return confirm('حذف هذه الولاية؟')">
+                <button type="submit" class="btn btn-danger btn-sm">حذف</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+        <% if (zones.length === 0) { %><tr><td colspan="5"><p class="muted">لا توجد ولايات بعد — أضف ولايات للتوصيل من الأعلى</p></td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

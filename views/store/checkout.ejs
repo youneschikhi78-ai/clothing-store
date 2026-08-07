@@ -18,8 +18,18 @@
         <input type="tel" name="phone" placeholder="01xxxxxxxxx" required>
       </div>
       <div class="form-group">
-        <label>المدينة *</label>
-        <input type="text" name="city" required>
+        <label><%= zones.length ? 'الولاية *' : 'المدينة *' %></label>
+        <% if (zones.length > 0) { %>
+          <select name="city" id="zoneSelect" required>
+            <option value="">— اختر الولاية —</option>
+            <% zones.forEach(z => { %>
+              <option value="<%= z.name %>" data-price="<%= z.price %>" <%= selectedCity === z.name ? 'selected' : '' %>><%= z.name %> (<%= z.price === 0 ? 'مجاني' : z.price.toLocaleString('ar-EG') + ' ' + (site.currency || 'ج.م') %>)</option>
+            <% }) %>
+          </select>
+          <p class="muted">الشحن يتم فقط إلى الولايات المتاحة أعلاه</p>
+        <% } else { %>
+          <input type="text" name="city" value="<%= selectedCity %>" required>
+        <% } %>
       </div>
       <div class="form-group">
         <label>العنوان بالتفصيل *</label>
@@ -41,17 +51,45 @@
       <% }) %>
       <div class="summary-row">
         <span>الشحن</span>
-        <span><%= shippingCost === 0 ? 'مجاني' : shippingCost.toLocaleString('ar-EG') + ' ' + (site.currency || 'ج.م') %></span>
+        <span id="shippingCell"><%= shippingCost === null ? 'اختر الولاية' : (shippingCost === 0 ? 'مجاني' : shippingCost.toLocaleString('ar-EG') + ' ' + (site.currency || 'ج.م')) %></span>
       </div>
+      <% if (freeOver > 0 && zones.length === 0) { %>
+        <p class="muted">توصيل مجاني للطلبات فوق <%= freeOver.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></p>
+      <% } %>
       <hr>
       <div class="summary-row total">
         <span>الإجمالي</span>
-        <span><%= (cart.total + shippingCost).toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
+        <span id="totalCell"><%= (cart.total + (shippingCost || 0)).toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
       </div>
     </div>
 
     <button type="submit" class="btn btn-primary btn-lg btn-block">الدفع عند الاستلام</button>
   </form>
 </div>
+
+<% if (zones.length > 0) { %>
+<script>
+  (function () {
+    var sel = document.getElementById('zoneSelect');
+    var base = <%= cart.total %>;
+    var ship = document.getElementById('shippingCell');
+    var total = document.getElementById('totalCell');
+    var currency = '<%= site.currency || 'ج.م' %>';
+    var fmt = function (n) { return n.toLocaleString('ar-EG'); };
+    function upd() {
+      var opt = sel.options[sel.selectedIndex];
+      var price = opt && opt.value ? parseFloat(opt.dataset.price) : NaN;
+      if (opt && opt.value && !isNaN(price)) {
+        ship.textContent = price === 0 ? 'مجاني' : fmt(price) + ' ' + currency;
+        total.textContent = fmt(base + price) + ' ' + currency;
+      } else {
+        ship.textContent = 'اختر الولاية';
+        total.textContent = fmt(base) + ' ' + currency;
+      }
+    }
+    sel.addEventListener('change', upd);
+  })();
+</script>
+<% } %>
 
 <%- include('../partials/footer') %>
