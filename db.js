@@ -47,7 +47,7 @@ async function get(sql, params = []) {
 async function run(sql, params = []) {
   if (pool) {
     let s = sql;
-    if (/^\s*INSERT/i.test(s) && !/RETURNING/i.test(s)) s += ' RETURNING id';
+    if (/^\s*INSERT/i.test(s) && !/RETURNING/i.test(s)) s += ' RETURNING *';
     const r = await pool.query(toPgSql(s), params);
     return { lastInsertRowid: r.rows.length ? r.rows[0].id : null, changes: r.rowCount };
   }
