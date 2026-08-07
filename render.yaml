@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: clothing-store
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /health
+    envVars:
+      - key: SESSION_SECRET
+        generateValue: true

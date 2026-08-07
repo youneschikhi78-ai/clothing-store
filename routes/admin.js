@@ -35,7 +35,7 @@ function getStats() {
     newOrders: db.prepare("SELECT COUNT(*) c FROM orders WHERE status = 'new'").get().c,
     customers: db.prepare("SELECT COUNT(*) c FROM users WHERE role = 'customer'").get().c,
     unreadMessages: db.prepare('SELECT COUNT(*) c FROM messages WHERE read = 0').get().c,
-    revenue: db.prepare("SELECT COALESCE(SUM(total),0) t FROM orders WHERE status != 'cancelled'").get().t,
+    revenue: db.prepare("SELECT COALESCE(SUM(total),0) t FROM orders WHERE status = 'delivered'").get().t,
     lowStock: db.prepare('SELECT COUNT(*) c FROM products WHERE stock <= 5').get().c,
   };
 }
@@ -45,7 +45,12 @@ router.get('/', (req, res) => {
   const recentOrders = db.prepare('SELECT * FROM orders ORDER BY created_at DESC LIMIT 8').all();
   const recentMessages = db.prepare('SELECT * FROM messages ORDER BY created_at DESC LIMIT 5').all();
   const topProducts = db.prepare(
-    `SELECT oi.product_name, SUM(oi.qty) qty FROM order_items oi GROUP BY oi.product_id ORDER BY qty DESC LIMIT 5`
+    `SELECT oi.product_name, SUM(oi.qty) qty, SUM(oi.price * oi.qty) revenue
+     FROM order_items oi
+     JOIN orders o ON o.id = oi.order_id
+     WHERE o.status = 'delivered'
+     GROUP BY oi.product_id
+     ORDER BY qty DESC LIMIT 5`
   ).all();
 
   res.render('admin/dashboard', { title: 'لوحة التحكم', layout: 'admin', stats, recentOrders, recentMessages, topProducts });
@@ -165,6 +170,22 @@ router.post('/orders/:id/status', (req, res) => {
   res.redirect('/admin/orders/' + req.params.id);
 });
 
+router.post('/orders/:id/delete', (req, res) => {
+  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
+  if (!order) return res.redirect('/admin/orders');
+
+  const restorable = ['new', 'processing', 'cancelled'];
+  if (restorable.includes(order.status)) {
+    const items = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(order.id);
+    const restoreStock = db.prepare('UPDATE products SET stock = stock + ? WHERE id = ?');
+    for (const it of items) {
+      if (it.product_id) restoreStock.run(it.qty, it.product_id);
+    }
+  }
+  db.prepare('DELETE FROM orders WHERE id = ?').run(req.params.id);
+  res.redirect('/admin/orders');
+});
+
 /* ---------- العملاء ---------- */
 router.get('/customers', (req, res) => {
   const customers = db.prepare(
@@ -173,6 +194,11 @@ router.get('/customers', (req, res) => {
      FROM users u WHERE u.role = 'customer' ORDER BY u.created_at DESC`
   ).all();
   res.render('admin/customers', { title: 'العملاء', layout: 'admin', customers });
+});
+
+router.post('/customers/:id/ban', (req, res) => {
+  db.prepare("UPDATE users SET banned = CASE banned WHEN 1 THEN 0 ELSE 1 END WHERE id = ? AND role = 'customer'").run(req.params.id);
+  res.redirect('/admin/customers');
 });
 
 /* ---------- الرسائل ---------- */

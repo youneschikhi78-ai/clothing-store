@@ -524,6 +524,8 @@ hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
 .message-row { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; flex-wrap: wrap; }
 .message-row.unread { background: #fef2f2; border-radius: 8px; padding: 10px 8px; }
 .row-unread { background: #fef2f2; }
+.row-banned { background: #fef2f2; opacity: 0.85; }
+.row-banned td:first-child { opacity: 1; }
 .message-body { background: var(--bg); border-radius: 10px; padding: 18px; margin: 16px 0; }
 .quick-actions { display: flex; flex-direction: column; gap: 10px; }
 .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }

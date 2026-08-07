@@ -48,6 +48,18 @@
     </form>
     <hr>
     <p><span class="status status-<%= order.status %>"><%= order.status %></span></p>
+    <hr>
+    <h3>حذف الطلب</h3>
+    <p class="muted">
+      <% if (['new', 'processing', 'cancelled'].includes(order.status)) { %>
+        الحالة: <strong>جديد / قيد التجهيز / ملغي</strong> — عند الحذف ستُعاد المنتجات إلى المخزون.
+      <% } else { %>
+        الحالة: <strong>تم الشحن / تم التسليم</strong> — عند الحذف <strong>لن تُعاد</strong> المنتجات إلى المخزون.
+      <% } %>
+    </p>
+    <form action="/admin/orders/<%= order.id %>/delete" method="POST" onsubmit="return confirm('حذف الطلب #<%= order.id %> نهائياً؟')">
+      <button type="submit" class="btn btn-danger">حذف الطلب نهائياً</button>
+    </form>
   </div>
 </div>
 

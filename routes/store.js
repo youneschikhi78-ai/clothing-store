@@ -16,6 +16,12 @@ function cartInfo(req) {
 }
 
 router.use((req, res, next) => {
+  if (req.session.user) {
+    const u = db.prepare('SELECT banned FROM users WHERE id = ?').get(req.session.user.id);
+    if (u && u.banned) {
+      return req.session.destroy(() => res.redirect('/login?banned=1'));
+    }
+  }
   const s = settings();
   const cats = db.prepare('SELECT * FROM categories ORDER BY id').all();
   const c = cartInfo(req);

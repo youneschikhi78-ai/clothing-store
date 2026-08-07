@@ -13,7 +13,7 @@
     <table class="table">
       <thead>
         <tr>
-          <th>#</th><th>العميل</th><th>الهاتف</th><th>المدينة</th><th>الإجمالي</th><th>التاريخ</th><th>الحالة</th><th></th>
+          <th>#</th><th>العميل</th><th>الهاتف</th><th>المدينة</th><th>الإجمالي</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th>
         </tr>
       </thead>
       <tbody>
@@ -29,7 +29,12 @@
             <td><%= o.total.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></td>
             <td><%= new Date(o.created_at).toLocaleString('ar-EG') %></td>
             <td><span class="status status-<%= o.status %>"><%= { new: 'جديد', processing: 'قيد التجهيز', shipped: 'تم الشحن', delivered: 'تم التسليم', cancelled: 'ملغي' }[o.status] || o.status %></span></td>
-            <td><a href="/admin/orders/<%= o.id %>" class="btn btn-ghost btn-sm">تفاصيل</a></td>
+            <td class="actions-cell">
+              <a href="/admin/orders/<%= o.id %>" class="btn btn-ghost btn-sm">تفاصيل</a>
+              <form action="/admin/orders/<%= o.id %>/delete" method="POST" onsubmit="return confirm('حذف الطلب #<%= o.id %> نهائياً؟')">
+                <button class="btn btn-danger btn-sm">حذف</button>
+              </form>
+            </td>
           </tr>
         <% }) %>
       </tbody>

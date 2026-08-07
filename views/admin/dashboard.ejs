@@ -85,7 +85,7 @@
       <div class="top-product">
         <span class="top-rank"><%= i + 1 %></span>
         <span class="top-name"><%= p.product_name %></span>
-        <span class="top-qty"><%= p.qty %> قطعة</span>
+        <span class="top-qty"><%= p.qty %> قطعة — <%= p.revenue.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></span>
       </div>
     <% }) %>
   </div>

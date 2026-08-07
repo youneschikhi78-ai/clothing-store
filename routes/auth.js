@@ -7,7 +7,7 @@ router.get('/login', isGuest, (req, res) => {
   res.render('store/login', {
     title: 'تسجيل الدخول',
     layout: 'store',
-    error: null,
+    error: req.query.banned ? 'حسابك محظور من المتجر. تواصل مع إدارة المتجر.' : null,
     next: req.query.next || '/',
     cartCount: 0,
   });
@@ -16,9 +16,11 @@ router.get('/login', isGuest, (req, res) => {
 router.post('/login', (req, res) => {
   const { email, password, next } = req.body;
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
-  const error = !user || !verifyPassword(password, user.password_hash)
-    ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
-    : null;
+
+  let error = null;
+  if (!user) error = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+  else if (!verifyPassword(password, user.password_hash)) error = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+  else if (user.banned) error = 'حسابك محظور من المتجر. تواصل مع إدارة المتجر.';
 
   if (error) {
     return res.render('store/login', {

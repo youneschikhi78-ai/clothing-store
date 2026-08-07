@@ -5,20 +5,32 @@
     <table class="table">
       <thead>
         <tr>
-          <th>العميل</th><th>البريد الإلكتروني</th><th>الطلبات</th><th>إجمالي الإنفاق</th><th>تاريخ التسجيل</th>
+          <th>العميل</th><th>البريد الإلكتروني</th><th>الطلبات</th><th>إجمالي الإنفاق</th><th>الحالة</th><th>تاريخ التسجيل</th><th>إجراءات</th>
         </tr>
       </thead>
       <tbody>
         <% if (customers.length === 0) { %>
-          <tr><td colspan="5" class="center-text">لا يوجد عملاء بعد</td></tr>
+          <tr><td colspan="7" class="center-text">لا يوجد عملاء بعد</td></tr>
         <% } %>
         <% customers.forEach(c => { %>
-          <tr>
+          <tr class="<%= c.banned ? 'row-banned' : '' %>">
             <td><%= c.name %></td>
             <td><%= c.email %></td>
             <td><%= c.order_count %></td>
             <td><%= c.total_spent.toLocaleString('ar-EG') %> <%= site.currency || 'ج.م' %></td>
+            <td>
+              <span class="status <%= c.banned ? 'status-cancelled' : 'status-delivered' %>">
+                <%= c.banned ? 'محظور' : 'نشط' %>
+              </span>
+            </td>
             <td><%= new Date(c.created_at).toLocaleDateString('ar-EG') %></td>
+            <td>
+              <form action="/admin/customers/<%= c.id %>/ban" method="POST" onsubmit="return confirm('<%= c.banned ? 'إلغاء حظر' : 'حظر' %> العميل <%= c.name %>؟')">
+                <button class="btn <%= c.banned ? 'btn-ghost' : 'btn-danger' %> btn-sm">
+                  <%= c.banned ? 'إلغاء الحظر' : 'حظر ⛔' %>
+                </button>
+              </form>
+            </td>
           </tr>
         <% }) %>
       </tbody>

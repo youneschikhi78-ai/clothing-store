@@ -96,6 +96,12 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 `);
 
+const userCols = db.prepare('PRAGMA table_info(users)').all();
+if (!userCols.some(c => c.name === 'banned')) {
+  db.exec("ALTER TABLE users ADD COLUMN banned INTEGER NOT NULL DEFAULT 0");
+  console.log('✓ تمت ترقية قاعدة البيانات (عمود banned)');
+}
+
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString('hex');
   const hash = crypto.scryptSync(password, salt, 64).toString('hex');
