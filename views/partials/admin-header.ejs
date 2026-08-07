@@ -8,7 +8,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
 </head>
 <body class="admin-body">
-  <aside class="admin-sidebar">
+  <aside class="admin-sidebar" id="adminSidebar">
     <a href="/" class="admin-logo">👕 <%= site.site_name || 'المتجر' %></a>
     <nav class="admin-nav">
       <a href="/admin" class="<%= adminPath === '/' ? 'active' : '' %>">📊 نظرة عامة</a>
@@ -29,6 +29,7 @@
   </aside>
   <div class="admin-main">
     <header class="admin-topbar">
+      <button type="button" class="nav-toggle" data-admin-toggle aria-label="القائمة">☰</button>
       <h1><%= title %></h1>
       <span class="admin-user">مرحباً، <%= adminUser.name %></span>
     </header>

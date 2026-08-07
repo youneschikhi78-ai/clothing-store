@@ -30,3 +30,26 @@ document.addEventListener('click', (e) => {
 
   if (drop && !e.target.closest('.user-menu')) drop.classList.remove('open');
 });
+
+const nav = document.getElementById('mainNav');
+const navToggle = document.querySelector('[data-nav-toggle]');
+if (navToggle && nav) {
+  navToggle.addEventListener('click', () => nav.classList.toggle('open'));
+  nav.addEventListener('click', (e) => {
+    if (e.target.closest('a')) nav.classList.remove('open');
+  });
+}
+
+const adminSidebar = document.getElementById('adminSidebar');
+const adminToggle = document.querySelector('[data-admin-toggle]');
+if (adminToggle && adminSidebar) {
+  adminToggle.addEventListener('click', () => adminSidebar.classList.toggle('open'));
+  adminSidebar.addEventListener('click', (e) => {
+    if (e.target.closest('a')) adminSidebar.classList.remove('open');
+  });
+  document.addEventListener('click', (e) => {
+    if (adminSidebar.classList.contains('open') && !e.target.closest('.admin-sidebar') && !e.target.closest('[data-admin-toggle]')) {
+      adminSidebar.classList.remove('open');
+    }
+  });
+}

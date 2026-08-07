@@ -14,11 +14,21 @@
         <span class="logo-icon">👕</span>
         <span><%= site.site_name || 'المتجر' %></span>
       </a>
-      <nav class="main-nav">
+      <nav class="main-nav" id="mainNav">
         <a href="/" class="<%= typeof currentPage === 'undefined' || currentPage === 'home' ? 'active' : '' %>">الرئيسية</a>
         <a href="/products" class="<%= typeof currentPage !== 'undefined' && currentPage === 'products' ? 'active' : '' %>">المنتجات</a>
         <a href="/page/about">من نحن</a>
         <a href="/contact">اتصل بنا</a>
+        <div class="nav-auth mobile-only">
+          <% if (user) { %>
+            <% if (user.role === 'admin') { %><a href="/admin">لوحة التحكم</a><% } %>
+            <a href="/orders">طلباتي</a>
+            <a href="/logout">تسجيل الخروج</a>
+          <% } else { %>
+            <a href="/login">تسجيل الدخول</a>
+            <a href="/register">إنشاء حساب</a>
+          <% } %>
+        </div>
       </nav>
       <div class="header-actions">
         <a href="/cart" class="cart-link" title="سلة التسوق">
@@ -36,9 +46,10 @@
             </div>
           </div>
         <% } else { %>
-          <a href="/login" class="btn btn-ghost btn-sm">تسجيل الدخول</a>
-          <a href="/register" class="btn btn-primary btn-sm">إنشاء حساب</a>
+          <a href="/login" class="btn btn-ghost btn-sm desktop-auth">تسجيل الدخول</a>
+          <a href="/register" class="btn btn-primary btn-sm desktop-auth">إنشاء حساب</a>
         <% } %>
+        <button type="button" class="nav-toggle" data-nav-toggle aria-label="القائمة">☰</button>
       </div>
     </div>
   </header>
