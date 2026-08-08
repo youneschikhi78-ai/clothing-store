@@ -58,12 +58,18 @@ router.get('/', ah(async (req, res) => {
 
 router.get('/products', ah(async (req, res) => {
   const { cat, q } = req.query;
+  const catNum = cat && /^\d+$/.test(cat) ? parseInt(cat, 10) : null;
   let sql = 'SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON c.id = p.category_id WHERE p.active = 1';
   const params = [];
 
   if (cat) {
-    sql += ' AND (c.slug = ? OR c.id = ?)';
-    params.push(cat, cat);
+    if (catNum !== null) {
+      sql += ' AND (c.slug = ? OR c.id = ?)';
+      params.push(cat, catNum);
+    } else {
+      sql += ' AND c.slug = ?';
+      params.push(cat);
+    }
   }
   if (q) {
     sql += ' AND p.name LIKE ?';
@@ -72,7 +78,11 @@ router.get('/products', ah(async (req, res) => {
   sql += ' ORDER BY p.created_at DESC';
 
   const products = await db.all(sql, params);
-  const currentCat = cat ? await db.get('SELECT * FROM categories WHERE slug = ? OR id = ?', [cat, cat]) : null;
+  const currentCat = cat
+    ? (catNum !== null
+        ? await db.get('SELECT * FROM categories WHERE slug = ? OR id = ?', [cat, catNum])
+        : await db.get('SELECT * FROM categories WHERE slug = ?', [cat]))
+    : null;
 
   res.render('store/products', {
     title: currentCat ? currentCat.name : (q ? 'نتائج البحث' : 'جميع المنتجات'),
