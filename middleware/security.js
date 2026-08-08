@@ -96,7 +96,7 @@ function loginLimiter(req, res, next) {
     return rec;
   };
 
-  const recEmail = getRec(ip + '|' + email);
+  const recEmail = getRec('email|' + email);
   const recIp = getRec('ip|' + ip);
 
   const remaining = (rec) => Math.ceil((rec.lockedUntil - now) / 60000);
@@ -122,7 +122,7 @@ function loginLimiter(req, res, next) {
   lockIfExceeded(recEmail, MAX_ATTEMPTS_PER_KEY);
   lockIfExceeded(recIp, MAX_ATTEMPTS_PER_IP);
 
-  res.locals.loginKeys = [ip + '|' + email, 'ip|' + ip];
+  res.locals.loginKeys = ['email|' + email, 'ip|' + ip];
   next();
 }
 

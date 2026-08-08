@@ -18,7 +18,7 @@ app.use(async (req, res, next) => {
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-app.set('trust proxy', 1);
+app.set('trust proxy', true);
 app.disable('x-powered-by');
 
 app.use(helmet({
@@ -47,10 +47,6 @@ app.use(sanitizeBody);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', uptime: process.uptime() });
-});
-
-app.get('/__ip', (req, res) => {
-  res.json({ ip: req.ip, xff: req.headers['x-forwarded-for'] || null, remote: req.socket && req.socket.remoteAddress });
 });
 
 app.use(session({
