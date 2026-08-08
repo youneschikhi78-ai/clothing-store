@@ -79,7 +79,8 @@ const ATTEMPTS = new Map();
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_ATTEMPTS_PER_KEY = 5;
 const MAX_ATTEMPTS_PER_IP = 20;
-const LOCK_MS = 15 * 60 * 1000;
+const LOCK_MS_SHORT = 5 * 60 * 1000;
+const LOCK_MS_LONG = 15 * 60 * 1000;
 
 function loginLimiter(req, res, next) {
   const email = String(req.body.email || '').toLowerCase().trim();
@@ -88,8 +89,8 @@ function loginLimiter(req, res, next) {
 
   const getRec = (key) => {
     let rec = ATTEMPTS.get(key);
-    if (!rec || now - rec.firstAt > WINDOW_MS) {
-      rec = { count: 0, firstAt: now, lockedUntil: 0 };
+    if (!rec || (rec.lockedUntil <= now && now - rec.firstAt > WINDOW_MS)) {
+      rec = { count: 0, firstAt: now, lockedUntil: 0, lockStage: rec ? rec.lockStage : 0 };
       ATTEMPTS.set(key, rec);
     }
     return rec;
@@ -109,10 +110,17 @@ function loginLimiter(req, res, next) {
     return next();
   }
 
-  recEmail.count++;
-  recIp.count++;
-  if (recEmail.count > MAX_ATTEMPTS_PER_KEY && !recEmail.lockedUntil) recEmail.lockedUntil = now + LOCK_MS;
-  if (recIp.count > MAX_ATTEMPTS_PER_IP && !recIp.lockedUntil) recIp.lockedUntil = now + LOCK_MS;
+  const lockIfExceeded = (rec, max) => {
+    rec.count++;
+    if (rec.count > max && rec.lockedUntil <= now) {
+      const duration = (rec.lockStage || 0) === 0 ? LOCK_MS_SHORT : LOCK_MS_LONG;
+      rec.lockedUntil = now + duration;
+      rec.lockStage = (rec.lockStage || 0) + 1;
+      if (!req.rateLock) req.rateLock = Math.ceil(duration / 60000);
+    }
+  };
+  lockIfExceeded(recEmail, MAX_ATTEMPTS_PER_KEY);
+  lockIfExceeded(recIp, MAX_ATTEMPTS_PER_IP);
 
   res.locals.loginKeys = [ip + '|' + email, 'ip|' + ip];
   next();
