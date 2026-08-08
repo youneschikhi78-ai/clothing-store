@@ -49,6 +49,10 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', uptime: process.uptime() });
 });
 
+app.get('/__ip', (req, res) => {
+  res.json({ ip: req.ip, xff: req.headers['x-forwarded-for'] || null, remote: req.socket && req.socket.remoteAddress });
+});
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'clothing-store-secret-key-change-me',
   resave: false,
